@@ -6,4 +6,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     // Add DbSets here as models are created
     // public DbSet<User> Users => Set<User>();
+
+    // test
+    public DbSet<TestItem> TestItems => Set<TestItem>();
+
 }
