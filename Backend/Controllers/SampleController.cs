@@ -1,3 +1,4 @@
+using Backend.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -10,7 +11,11 @@ public class SampleController(AppDbContext db) : ControllerBase
     [HttpGet]
     public IActionResult GetAll()
     {
-        return Ok();
+        return Ok(new[]
+        {
+            new { Id = 1, Name = "Test item" },
+            new { Id = 2, Name = "Another item" }
+        });
     }
 
     // GET api/sample/{id}
