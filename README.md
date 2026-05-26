@@ -1,2 +1,2 @@
-# CaptianCrave
+# CaptainCrave
 
