@@ -1,0 +1,44 @@
+.login-card {
+  max-width: 360px;
+  margin: 80px auto;
+  padding: 24px;
+  border: 1px solid #d0c6c6;
+  border-radius: 8px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.login-card h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0 16px;
+  box-sizing: border-box;
+}
+
+.login-card button {
+  width: 100%;
+  padding: 10px;
+  background-color: #222;
+  color: white;
+  cursor: pointer;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.signup-link a {
+  font-weight: bold;
+  text-decoration: none;
+  color: #5f5f5f;
+
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}

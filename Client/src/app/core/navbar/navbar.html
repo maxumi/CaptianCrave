@@ -1,0 +1,28 @@
+<nav class="navbar" *transloco="let t">
+  <div class="brand">
+    <img src="captain_crave.png" alt="Captain Crave logo">
+    <span>Captain Crave</span>
+  </div>
+
+  <div class="search-box">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input type="text" [placeholder]="t('navbar.search')" />
+  </div>
+
+  <div class="navbar-actions">
+    <button class="notification-btn">
+      <mat-icon class="notification-icon">notifications</mat-icon>
+    </button>
+
+    <div class="auth-buttons">
+      <button class="signin-btn">{{ t("navbar.signIn") }}</button>
+      <button class="register-btn">{{ t("navbar.register") }}</button>
+    </div>
+    <div class="language-select">
+      <select [value]="currentLang()" (change)="setLang($any($event.target).value)">
+        <option value="en">{{t("navbar.lang.en")}}</option>
+        <option value="da">{{t("navbar.lang.da")}}</option>
+      </select>
+    </div>
+  </div>
+</nav>
