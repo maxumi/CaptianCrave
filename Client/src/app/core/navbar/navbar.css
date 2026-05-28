@@ -1,0 +1,112 @@
+.navbar {
+  max-width: 1420px;
+  margin: 10px auto;
+  padding: 14px 40px;
+  background-color: #f8f8f8;
+  color: #222;
+  border-radius: 12px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.brand img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  margin-right: 20px;
+}
+
+.search-box {
+  width: 340px;
+  height: 44px;
+  padding: 0 16px;
+  background-color: #eee8f0;
+  border-radius: 20px;
+
+  display: flex;
+  align-items: center;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-buttons button {
+  border-radius: 10px;
+  background-color: #222;
+  color: #fff;
+  cursor: pointer;
+  padding: 5px 12px;
+  transition-duration: 0.4s;
+}
+
+.auth-buttons button:hover {
+    background-color: #ffffff;
+    color: #b21919;
+    box-shadow: 0 2px 5px rgba(178, 25, 25, 0.5);
+    
+}
+
+
+.notification-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.notification-icon {
+  color: #333;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.notification-btn:hover .notification-icon {
+  color: #116df7;
+  transform: scale(1.15);
+}
+
+.language-select select {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #222;
+  cursor: pointer;
+  outline: none;
+  font-size: 14px;
+}
+
+.language-select select:hover {
+  border-color: #b21919;
+  box-shadow: 0 2px 5px rgba(178, 25, 25, 0.25);
+}
+
+.language-select select:focus {
+  border-color: #116df7;
+  box-shadow: 0 0 0 2px rgba(17, 109, 247, 0.2);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

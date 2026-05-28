@@ -1,0 +1,27 @@
+{
+  "foo": "Foo",
+  "bar": "Bjælke",
+  "dashboard": {
+    "title": "Dashboardtitel",
+    "desc": "Dashboardbeskrivelse"
+  },
+  "navbar": {
+    "search": "Søg",
+    "signIn": "Log ind",
+    "signOut": "Log ud",
+    "register": "Opret konto",
+    "lang": {
+      "en": "English",
+      "da": "Dansk"
+    }
+  },
+  "login": {
+    "title": "Log ind på din konto",
+    "createAccount": "Har du ikke en konto?",
+    "signUp": "Opret konto",
+    "placeholder": {
+      "email": "Indtast email",
+      "password": "Indtast adgangskode"
+    }
+  }
+}

@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TestComponent } from './test';
+import { Navbar } from './navbar';
 import { getTranslocoModule } from '../../shared/test/transloco-testing.module';
 
-describe('Test', () => {
-  let component: TestComponent;
-  let fixture: ComponentFixture<TestComponent>;
+describe('Navbar', () => {
+  let component: Navbar;
+  let fixture: ComponentFixture<Navbar>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestComponent, getTranslocoModule()]
+      imports: [Navbar, getTranslocoModule()]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TestComponent);
+    fixture = TestBed.createComponent(Navbar);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

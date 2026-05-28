@@ -2,10 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
+import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-test',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoModule],
   templateUrl: './test.html',
   styleUrl: './test.css',
 })

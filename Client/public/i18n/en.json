@@ -1,0 +1,28 @@
+{
+  "foo": "Foo",
+  "bar": "Bar",
+  "dashboard": {
+    "title": "Dashboard Title",
+    "desc": "Dashboard Description"
+  },
+  "navbar": {
+    "search": "Search",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "register": "Register",
+    "lang": {
+      "en": "English",
+      "da": "Dansk"
+    }
+  },
+  "login": {
+    "title": "Login to your account",
+    "createAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "placeholder": {
+      "email": "Enter email",
+      "password": "Enter password"
+    }
+  }
+  
+}
