@@ -1,27 +1,37 @@
 <nav class="navbar" *transloco="let t">
-  <div class="brand">
-    <img src="captain_crave.png" alt="Captain Crave logo">
+  <a class="brand" href="/" aria-label="Captain Crave home">
+    <img src="captain_crave.png" alt="Captain Crave logo" />
     <span>Captain Crave</span>
-  </div>
+  </a>
 
-  <div class="search-box">
+  <form class="search-box" role="search">
     <mat-icon class="search-icon">search</mat-icon>
     <input type="text" [placeholder]="t('navbar.search')" />
-  </div>
+  </form>
 
   <div class="navbar-actions">
-    <button class="notification-btn">
+    <button class="notification-btn" type="button" aria-label="Notifications">
       <mat-icon class="notification-icon">notifications</mat-icon>
     </button>
 
     <div class="auth-buttons">
-      <button class="signin-btn">{{ t("navbar.signIn") }}</button>
-      <button class="register-btn">{{ t("navbar.register") }}</button>
+      <button class="signin-btn" type="button">
+        {{ t("navbar.signIn") }}
+      </button>
+
+      <button class="register-btn" type="button">
+        {{ t("navbar.register") }}
+      </button>
     </div>
+
     <div class="language-select">
-      <select [value]="currentLang()" (change)="setLang($any($event.target).value)">
-        <option value="en">{{t("navbar.lang.en")}}</option>
-        <option value="da">{{t("navbar.lang.da")}}</option>
+      <select
+        [value]="currentLang()"
+        (change)="setLang($any($event.target).value)"
+        aria-label="Select language"
+      >
+        <option value="en">{{ t("navbar.lang.en") }}</option>
+        <option value="da">{{ t("navbar.lang.da") }}</option>
       </select>
     </div>
   </div>

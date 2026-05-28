@@ -1,21 +1,45 @@
-<div class="login-card"  *transloco="let t">
-  <h2>{{t("login.title")}}</h2>
+<div class="login-card" *transloco="let t">
+  <h2>{{ t("login.title") }}</h2>
 
-  <label>Email</label>
-  <input type="email" [placeholder]="t('login.placeholder.email')">
+  <form [formRoot]="loginForm" (submit)="login()">
+    <label>{{ t("login.label.email") }}</label>
+    <input
+      type="email"
+      [formField]="loginForm.email"
+      [placeholder]="t('login.placeholder.email')"
+    />
 
-  <label>Password</label>
-  <input type="password" [placeholder]="t('login.placeholder.password')">
+    @if (loginForm.email().touched() && loginForm.email().invalid()) {
+      @for (error of loginForm.email().errors(); track error.kind) {
+        <p class="error">{{ error.message }}</p>
+      }
+    }
 
-  <button>
-    Login
-  </button>
+    <label>{{ t("login.label.password") }}</label>
+    <input
+      type="password"
+      [formField]="loginForm.password"
+      [placeholder]="t('login.placeholder.password')"
+    />
+
+    @if (loginForm.password().touched() && loginForm.password().invalid()) {
+      @for (error of loginForm.password().errors(); track error.kind) {
+        <p class="error">{{ error.message }}</p>
+      }
+    }
+
+    <button type="submit">
+      Login
+    </button>
+  </form>
 
   <div class="signup-link">
-    {{t("login.createAccount")}}
-    <a href="#">{{t("login.signUp")}}</a>
+    {{ t("login.createAccount") }}
+    <a routerLink="/register">{{ t("login.signUp") }}</a>
   </div>
 </div>
+
+<!-- Extra content to test layout behavior when page is taller than the screen 
 <div style="max-width: 700px; margin: 40px auto; padding: 0 24px; line-height: 1.6;">
   <h3>Extra content for layout testing</h3>
 
@@ -54,3 +78,4 @@
     End of test content.
   </p>
 </div>
+-->

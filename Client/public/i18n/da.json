@@ -17,11 +17,34 @@
   },
   "login": {
     "title": "Log ind på din konto",
+    "button": "Log ind",
     "createAccount": "Har du ikke en konto?",
     "signUp": "Opret konto",
+    "label": {
+      "email": "Email",
+      "password": "Adgangskode"
+    },
     "placeholder": {
       "email": "Indtast email",
       "password": "Indtast adgangskode"
+    }
+  },
+  "register": {
+    "title": "Opret konto",
+    "alreadyHaveAccount": "Har du allerede en konto?",
+    "login": "Log ind",
+    "button": "Opret konto",
+    "label": {
+      "name": "Navn",
+      "email": "Email",
+      "password": "Adgangskode",
+      "confirmPassword": "Bekræft adgangskode"
+    },
+    "placeholder": {
+      "name": "Indtast dit navn",
+      "email": "Indtast email",
+      "password": "Indtast adgangskode",
+      "confirmPassword": "Gentag adgangskode"
     }
   }
 }

@@ -19,9 +19,31 @@
     "title": "Login to your account",
     "createAccount": "Don't have an account?",
     "signUp": "Sign up",
+    "label": {
+      "email": "Email",
+      "password": "Password"
+    },
     "placeholder": {
       "email": "Enter email",
       "password": "Enter password"
+    }
+  },
+    "register": {
+    "title": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login",
+    "button": "Register",
+    "label": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "placeholder": {
+      "name": "Enter your name",
+      "email": "Enter email",
+      "password": "Enter password",
+      "confirmPassword": "Repeat password"
     }
   }
   
