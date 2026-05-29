@@ -1,3 +1,4 @@
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data;
@@ -9,5 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     // test
     public DbSet<TestItem> TestItems => Set<TestItem>();
+
+    public DbSet<User> Users { get; set; }
 
 }
