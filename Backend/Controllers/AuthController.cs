@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
         {
             Name = registerDto.Name,
             Email = registerDto.Email,
-            Password = registerDto.Password
+            PasswordHash = registerDto.Password
         };
 
         _db.Users.Add(user);
@@ -51,7 +51,7 @@ public class AuthController : ControllerBase
 
         var user = _db.Users.FirstOrDefault(u =>
             u.Email == loginDto.Email &&
-            u.Password == loginDto.Password);
+            u.PasswordHash == loginDto.Password);
 
         if (user == null)
             return Unauthorized("Wrong email or password");
