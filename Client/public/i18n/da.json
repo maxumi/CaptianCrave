@@ -46,5 +46,17 @@
       "password": "Indtast adgangskode",
       "confirmPassword": "Gentag adgangskode"
     }
+  },
+    "restaurants": {
+      "title": "Restauranter nær dig",
+      "subtitle": "Statiske eksempelrestauranter for nu.",
+      "status": {
+        "open": "Åben",
+        "closed": "Lukket"
+      }
+  },
+    "restaurantInfo": {
+      "menu": "Menuer",
+      "addItem": "Tilføj vare"
   }
 }

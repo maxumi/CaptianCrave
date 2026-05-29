@@ -1,0 +1,53 @@
+<div class="restaurant-info-page" *transloco="let t">
+  <div class="restaurant-banner">
+    <img src="burger-king.png" alt="Burger Palace" />
+  </div>
+
+  <h2>{{ t('restaurantInfo.menu') }}</h2>
+
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div>
+        <h3>Palace Original Menu</h3>
+        <p class="price">DKK 159.00</p>
+        <p class="description">Beef, fries, and a drink included.</p>
+      </div>
+
+      <img src="burger-king.png" alt="Palace Original Menu" />
+      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
+    </div>
+
+    <div class="menu-card">
+      <div>
+        <h3>Palace Burger Menu</h3>
+        <p class="price">DKK 155.00</p>
+        <p class="description">Classic burger menu with fries.</p>
+      </div>
+
+      <img src="burger-king.png" alt="Palace Burger Menu" />
+      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
+    </div>
+
+    <div class="menu-card">
+      <div>
+        <h3>Palace Cheese Menu</h3>
+        <p class="price">DKK 159.00</p>
+        <p class="description">Cheeseburger, fries, and drink.</p>
+      </div>
+
+      <img src="burger-king.png" alt="Palace Cheese Menu" />
+      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
+    </div>
+
+    <div class="menu-card">
+      <div>
+        <h3>Palace Texas Menu</h3>
+        <p class="price">DKK 159.00</p>
+        <p class="description">Burger with smoky Texas flavor.</p>
+      </div>
+
+      <img src="burger-king.png" alt="Palace Texas Menu" />
+      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
+    </div>
+  </div>
+</div>

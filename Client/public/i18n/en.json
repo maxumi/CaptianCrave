@@ -45,6 +45,18 @@
       "password": "Enter password",
       "confirmPassword": "Repeat password"
     }
+  },
+  "restaurants": {
+    "title": "Restaurants near you",
+    "subtitle": "Static example restaurants for now.",
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    }
+  },
+    "restaurantInfo": {
+    "menu": "Menu",
+    "addItem": "Add item"
   }
   
 }

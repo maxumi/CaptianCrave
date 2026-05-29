@@ -1,0 +1,47 @@
+<div class="restaurants-page" *transloco="let t">
+  <div class="restaurants-header">
+    <h1>{{ t('restaurants.title') }}</h1>
+    <p>{{ t('restaurants.subtitle') }}</p>
+  </div>
+
+  <div class="restaurant-list">
+    <div class="restaurant-card">
+      <img src="burger-king.png" alt="Pizza restaurant" />
+
+      <div class="restaurant-card-content">
+        <h2>Pizza Palace</h2>
+        <p>Classic pizzas, pasta, and quick Italian comfort food.</p>
+        <p class="restaurant-meta">1.2 km away · 20-30 min</p>
+        <span class="restaurant-status restaurant-status-open">
+          {{ t('restaurants.status.open') }}
+        </span>
+      </div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="burger-king.png" alt="Burger restaurant" />
+
+      <div class="restaurant-card-content">
+        <h2>Burger House</h2>
+        <p>Juicy burgers, crispy fries, and simple fast food favorites.</p>
+        <p class="restaurant-meta">800 m away · 15-25 min</p>
+        <span class="restaurant-status restaurant-status-open">
+          {{ t('restaurants.status.open') }}
+        </span>
+      </div>
+    </div>
+
+    <div class="restaurant-card">
+      <img src="burger-king.png" alt="Sushi restaurant" />
+
+      <div class="restaurant-card-content">
+        <h2>Sushi Spot</h2>
+        <p>Fresh sushi rolls, nigiri, and Japanese-style small dishes.</p>
+        <p class="restaurant-meta">2.4 km away · 25-35 min</p>
+        <span class="restaurant-status restaurant-status-closed">
+          {{ t('restaurants.status.closed') }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

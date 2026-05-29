@@ -1,11 +1,22 @@
+/* when angular is renderd it is throwin inside an additonal div,
+   use host when manipulating that */
+
+:host {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: block;
+  padding: 10px;
+}
 .navbar {
-  max-width: 1420px;
+  width: 100%;
   margin: 10px auto;
   padding: 14px 40px;
   background-color: #f8f8f8;
   color: #222;
   border-radius: 12px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
 
   display: grid;
   grid-template-columns: max-content minmax(220px, 340px) max-content;
