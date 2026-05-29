@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/auth.service';
 import {
@@ -25,6 +25,9 @@ interface LoginFormData {
 })
 export class Login {
   authService = inject(AuthService);
+  readonly isSubmitting = signal(false);
+  readonly loginError = signal<string | null>(null);
+  private readonly router = inject(Router);
 
   loginModel = signal<LoginFormData>({
     email: '',
@@ -49,10 +52,27 @@ export class Login {
       },
     },
   );
-  login(){
-    this.authService.login({
-      email: this.loginForm.email().value(),
-      password: this.loginForm.password().value(),
+
+  login(): void {
+    if (this.loginForm().invalid()) {
+      this.loginForm().markAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.loginError.set(null);
+
+    this.authService.login(this.loginModel()).subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.loginError.set('Invalid email or password');
+        this.isSubmitting.set(false);
+      },
+      complete: () => {
+        this.isSubmitting.set(false);
+      },
     });
   }
 }

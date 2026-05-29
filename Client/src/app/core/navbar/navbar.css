@@ -91,7 +91,8 @@
 
 .auth-buttons {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 
 .auth-buttons button {
@@ -132,4 +133,10 @@
 .language-select select:focus {
   border-color: #116df7;
   box-shadow: 0 0 0 2px rgba(17, 109, 247, 0.2);
+}
+
+.user-name {
+  color: #222;
+  font-weight: 600;
+  white-space: nowrap;
 }

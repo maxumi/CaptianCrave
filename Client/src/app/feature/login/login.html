@@ -30,7 +30,11 @@
       }
     }
 
-    <button class="form-button" type="submit">
+    @if (loginError()) {
+      <p class="error">{{ loginError() }}</p>
+    }
+
+    <button class="form-button" type="submit" [disabled]="isSubmitting()">
       Login
     </button>
   </form>
@@ -40,44 +44,3 @@
     <a routerLink="/register">{{ t("login.signUp") }}</a>
   </div>
 </div>
-
-<!-- Extra content to test layout behavior when page is taller than the screen 
-<div style="max-width: 700px; margin: 40px auto; padding: 0 24px; line-height: 1.6;">
-  <h3>Extra content for layout testing</h3>
-
-  <p>
-    This section is only here to test what happens when the page has more content.
-    If the content becomes taller than the screen, the page should scroll normally.
-  </p>
-
-  <p>
-    The navbar should stay at the top, the content should grow naturally, and the
-    footer should move below the content instead of overlapping it.
-  </p>
-
-  <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere,
-    neque at tincidunt feugiat, justo nulla facilisis massa, sed placerat arcu
-    lorem non justo.
-  </p>
-
-  <p>
-    Suspendisse potenti. Donec blandit, erat at feugiat laoreet, ipsum lorem
-    tincidunt justo, non facilisis lorem augue sit amet orci.
-  </p>
-
-  <p>
-    Curabitur luctus, massa vitae viverra blandit, lectus justo tincidunt nibh,
-    sed feugiat massa nulla at lectus.
-  </p>
-
-  <p>
-    More test content. More test content. More test content. More test content.
-    More test content. More test content. More test content. More test content.
-  </p>
-
-  <p>
-    End of test content.
-  </p>
-</div>
--->

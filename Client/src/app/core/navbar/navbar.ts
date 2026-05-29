@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,9 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   styleUrl: './navbar.css',
 })
 export class Navbar {
+  private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
+  
   transLocoService = inject(TranslocoService);
   currentLang = signal(localStorage.getItem('lang') ?? 'en')
 
@@ -18,5 +22,10 @@ export class Navbar {
     this.currentLang.set(lang);
     // use transloco service to change the language
     this.transLocoService.setActiveLang(lang);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

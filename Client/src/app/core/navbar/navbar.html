@@ -14,15 +14,25 @@
       <mat-icon class="notification-icon">notifications</mat-icon>
     </button>
 
-    <div class="auth-buttons">
-      <button class="signin-btn" type="button" routerLink="/login">
-        {{ t("navbar.signIn") }}
-      </button>
+<div class="auth-buttons">
+  @if (authService.user()) {
+    <span class="user-name">
+      {{ authService.user()?.name }}
+    </span>
 
-      <button class="register-btn" type="button" routerLink="/register">
-        {{ t("navbar.register") }}
-      </button>
-    </div>
+    <button class="signin-btn" type="button" (click)="logout()">
+      Logout
+    </button>
+  } @else {
+    <button class="signin-btn" type="button" routerLink="/login">
+      {{ t("navbar.signIn") }}
+    </button>
+
+    <button class="register-btn" type="button" routerLink="/register">
+      {{ t("navbar.register") }}
+    </button>
+  }
+</div>
 
     <div class="language-select">
       <select
