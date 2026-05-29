@@ -2,6 +2,7 @@ using Backend.Models.Enums;
 
 namespace Backend.Models;
 
+// Represents a user stored in the database
 public class User
 {
     public int Id { get; set; }

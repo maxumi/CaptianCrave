@@ -1,66 +1,47 @@
-using Backend.Data;
-using Backend.Models;
+using Backend.DTOs.Auth;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+// Handles user registration and login requests
 [ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+[Route("api/auth")]
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly AppDbContext _db;
-
-    public AuthController(AppDbContext db)
-    {
-        _db = db;
-    }
-
+    // Creates a new user account. Returns 409 if the email is already taken.
     [HttpPost("register")]
-    public IActionResult Register([FromBody] RegisterDto registerDto)
+    public async Task<IActionResult> Register([FromBody] RegisterRequestDto dto)
     {
-        if (registerDto == null)
-            return BadRequest("Invalid data");
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        // tjek om email allerede findes
-        var existingUser = _db.Users.FirstOrDefault(u => u.Email == registerDto.Email);
-
-        if (existingUser != null)
-            return BadRequest("User already exists");
-
-        var user = new User
+        try
         {
-            Name = registerDto.Name,
-            Email = registerDto.Email,
-            PasswordHash = registerDto.Password
-        };
-
-        _db.Users.Add(user);
-        _db.SaveChanges();
-
-        return Ok(new
+            var response = await authService.RegisterAsync(dto);
+            return CreatedAtAction(nameof(Register), response);
+        }
+        catch (InvalidOperationException ex)
         {
-            message = "User created successfully"
-        });
+            return Conflict(new { message = ex.Message });
+        }
     }
 
+    // Checks email and password and returns a JWT token if they are correct.
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginDto loginDto)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
     {
-        if (loginDto == null)
-            return BadRequest("Invalid data");
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        var user = _db.Users.FirstOrDefault(u =>
-            u.Email == loginDto.Email &&
-            u.PasswordHash == loginDto.Password);
-
-        if (user == null)
-            return Unauthorized("Wrong email or password");
-
-        return Ok(new
+        try
         {
-            message = "Login successful",
-            userId = user.Id,
-            name = user.Name
-        });
+            var response = await authService.LoginAsync(dto);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid email or password." });
+        }
     }
 }
