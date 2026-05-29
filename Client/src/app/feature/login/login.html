@@ -1,9 +1,10 @@
-<div class="login-card" *transloco="let t">
+<div class="auth-card" *transloco="let t">
   <h2>{{ t("login.title") }}</h2>
 
   <form [formRoot]="loginForm" (submit)="login()">
     <label>{{ t("login.label.email") }}</label>
     <input
+      class="form-input"
       type="email"
       [formField]="loginForm.email"
       [placeholder]="t('login.placeholder.email')"
@@ -17,6 +18,7 @@
 
     <label>{{ t("login.label.password") }}</label>
     <input
+      class="form-input"
       type="password"
       [formField]="loginForm.password"
       [placeholder]="t('login.placeholder.password')"
@@ -28,12 +30,12 @@
       }
     }
 
-    <button type="submit">
+    <button class="form-button" type="submit">
       Login
     </button>
   </form>
 
-  <div class="signup-link">
+  <div class="form-link">
     {{ t("login.createAccount") }}
     <a routerLink="/register">{{ t("login.signUp") }}</a>
   </div>

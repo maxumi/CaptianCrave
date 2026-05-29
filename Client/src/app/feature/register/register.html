@@ -1,8 +1,9 @@
-<form class="register-card" *transloco="let t" [formRoot]="registerForm">
+<form class="auth-card" *transloco="let t" [formRoot]="registerForm">
   <h2>{{ t("register.title") }}</h2>
 
-  <label>{{ t("register.label.name") }}</label>
+  <label class="form-label">{{ t("register.label.name") }}</label>
   <input
+    class="form-input"
     type="text"
     [formField]="registerForm.name"
     [placeholder]="t('register.placeholder.name')"
@@ -16,8 +17,9 @@
     </ul>
   }
 
-  <label>{{ t("register.label.email") }}</label>
+  <label class="form-label">{{ t("register.label.email") }}</label>
   <input
+    class="form-input"
     type="email"
     [formField]="registerForm.email"
     [placeholder]="t('register.placeholder.email')"
@@ -31,8 +33,9 @@
     </ul>
   }
 
-  <label>{{ t("register.label.password") }}</label>
+  <label class="form-label">{{ t("register.label.password") }}</label>
   <input
+    class="form-input"
     type="password"
     [formField]="registerForm.password"
     [placeholder]="t('register.placeholder.password')"
@@ -46,8 +49,9 @@
     </ul>
   }
 
-  <label>{{ t("register.label.confirmPassword") }}</label>
+  <label class="form-label">{{ t("register.label.confirmPassword") }}</label>
   <input
+    class="form-input"
     type="password"
     [formField]="registerForm.confirmPassword"
     [placeholder]="t('register.placeholder.confirmPassword')"
@@ -64,11 +68,11 @@
     </ul>
   }
 
-  <button type="submit" [disabled]="registerForm().invalid()" r>
+  <button class="form-button" type="submit" [disabled]="registerForm().invalid()">
     {{ t("register.button") }}
   </button>
 
-  <div class="login-link">
+  <div class="form-link">
     {{ t("register.alreadyHaveAccount") }}
     <a routerLink="/login">{{ t("register.login") }}</a>
   </div>

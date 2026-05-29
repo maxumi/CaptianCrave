@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MatIconModule, TranslocoModule],
+  imports: [MatIconModule, TranslocoModule, RouterLink],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
