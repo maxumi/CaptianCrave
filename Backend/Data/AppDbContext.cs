@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data;
 
+// The main database context, registers all tables and their configurations
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    // test
     public DbSet<TestItem> TestItems => Set<TestItem>();
 
     public DbSet<User> Users { get; set; }
