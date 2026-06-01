@@ -12,6 +12,7 @@ import {
   FormField,
   FormRoot,
 } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 interface LoginFormData {
   email: string;
   password: string;
@@ -33,46 +34,39 @@ export class Login {
     email: '',
     password: '',
   });
-  loginForm = form(
-    this.loginModel,
-    (schemaPath) => {
-      required(schemaPath.email, { message: 'Email is required' });
-      email(schemaPath.email, { message: 'Enter a valid email address' });
+loginForm = form(
+  this.loginModel,
+  (schemaPath) => {
+    required(schemaPath.email, { message: 'Email is required' });
+    email(schemaPath.email, { message: 'Enter a valid email address' });
 
-      required(schemaPath.password, { message: 'Password is required' });
-    },
-    {
-      submission: {
-        action: async (field) => {
-          await this.authService.login({
-            email: field().value().email,
-            password: field().value().password,
-          });
-        },
-      },
-    },
-  );
-
-  login(): void {
-    if (this.loginForm().invalid()) {
-      this.loginForm().markAsTouched();
-      return;
-    }
-
-    this.isSubmitting.set(true);
+    required(schemaPath.password, { message: 'Password is required' });
+  },
+  {
+submission: {
+  action: async () => {
     this.loginError.set(null);
 
-    this.authService.login(this.loginModel()).subscribe({
-      next: () => {
-        this.router.navigate(['/']);
-      },
-      error: () => {
-        this.loginError.set('Invalid email or password');
-        this.isSubmitting.set(false);
-      },
-      complete: () => {
-        this.isSubmitting.set(false);
-      },
-    });
-  }
+    try {
+      // Convert the login Observable to a Promise so we can await it.
+      await firstValueFrom(
+        this.authService.login(this.loginModel()),
+      );
+
+      await this.router.navigate(['/']);
+      
+       // No submission error.
+      return null;
+    } catch {
+      this.loginError.set('Invalid email or password');
+
+      return {
+        kind: 'serverError' as const,
+        message: 'Invalid email or password',
+      };
+    }
+  },
+},
+  },
+);
 }

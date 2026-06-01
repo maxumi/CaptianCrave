@@ -1,7 +1,7 @@
 <div class="auth-card" *transloco="let t">
   <h2>{{ t("login.title") }}</h2>
 
-  <form [formRoot]="loginForm" (submit)="login()">
+  <form [formRoot]="loginForm">
     <label>{{ t("login.label.email") }}</label>
     <input
       class="form-input"

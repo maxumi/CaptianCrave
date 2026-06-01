@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { AuthState } from '../../shared/models/user';
 import { environment } from '../../../environments/environment';
 
@@ -16,14 +16,12 @@ interface LoginRequest {
   password: string;
 }
 
-interface LoginResponse {
-  message: string;
-  userId: number;
+interface AuthResponse {
+  id: number;
   name: string;
-}
-
-interface RegisterResponse {
-  message: string;
+  email: string;
+  role: string;
+  token: string;
 }
 
 
@@ -38,12 +36,15 @@ export class AuthService {
   readonly user = signal<AuthState | null>(this.readAuthState());
 
   login(data: LoginRequest) {
-    return this.http.post<LoginResponse>(`${this.url}/login`, data).pipe(
+    return this.http.post<AuthResponse>(`${this.url}/login`, data).pipe(
       tap({
         next: (response) => {
           this.setAuthState({
-            userId: response.userId,
+            userId: response.id,
             name: response.name,
+            email: response.email,
+            role: response.role,
+            token: response.token,
           });
         },
       })
@@ -51,11 +52,27 @@ export class AuthService {
   }
 
   register(data: RegisterRequest) {
-    return this.http.post<RegisterResponse>(`${this.url}/register`, data);
+    return this.http.post<AuthResponse>(`${this.url}/register`, data).pipe(
+      tap({
+        next: (response) => {
+          this.setAuthState({
+            userId: response.id,
+            name: response.name,
+            email: response.email,
+            role: response.role,
+            token: response.token,
+          }); 
+        }
+      })
+    );
   }
 
   logout(): void {
     this.setAuthState(null);
+  }
+
+  getToken(): string | null {
+    return this.user()?.token ?? null;
   }
 
   private readAuthState(): AuthState | null {
@@ -66,7 +83,14 @@ export class AuthService {
     }
 
     try {
-      return JSON.parse(storedState) as AuthState;
+      const parsedState = JSON.parse(storedState) as Partial<AuthState>;
+
+      if (!parsedState.token) {
+        localStorage.removeItem(this.authStateKey);
+        return null;
+      }
+
+      return parsedState as AuthState;
     } catch {
       localStorage.removeItem(this.authStateKey);
       return null;

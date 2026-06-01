@@ -9,9 +9,10 @@ import {
   FormField,
   FormRoot,
 } from '@angular/forms/signals';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 interface RegisterFormData {
   name: string;
@@ -28,6 +29,10 @@ interface RegisterFormData {
 })
 export class Register {
   authService = inject(AuthService);
+
+  readonly registerError = signal<string | null>(null);
+  private readonly router = inject(Router);
+
 
   registerModel = signal<RegisterFormData>({
     name: '',
@@ -65,24 +70,37 @@ registerForm = form(
   },
   {
     submission: {
-      action: async (field) => {
-        const value = field().value();
+      action: async () => {
+        // Clear old register errors before trying again.
+        this.registerError.set(null);
 
-        this.authService.register({
-          name: value.name,
-          email: value.email,
-          password: value.password,
-        });
+        try {
+          // Send the form values to the auth service.
+          await firstValueFrom(
+            this.authService.register({
+              name: this.registerForm.name().value(),
+              email: this.registerForm.email().value(),
+              password: this.registerForm.password().value(),
+            }),
+          );
+
+          // Go to login page after successful registration.
+          await this.router.navigate(['/login']);
+
+          // No submission error.
+          return null;
+        } catch {
+          // Show a general register error.
+          this.registerError.set('Could not create account');
+
+          // Tell the form that submission failed.
+          return {
+            kind: 'serverError',
+            message: 'Could not create account',
+          };
+        }
       },
     },
   },
 );
-
-  register() {
-    this.authService.register({
-      name: this.registerForm.name().value(),
-      email: this.registerForm.email().value(),
-      password: this.registerForm.password().value(),
-    });
-  }
 }
