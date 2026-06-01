@@ -7,14 +7,9 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RestaurantsController : ControllerBase
+public class RestaurantsController(AppDbContext db) : ControllerBase
 {
-    private readonly AppDbContext _db;
-
-    public RestaurantsController(AppDbContext db)
-    {
-        _db = db;
-    }
+    private readonly AppDbContext _db = db;
 
     [HttpGet]
     public IActionResult GetAll()

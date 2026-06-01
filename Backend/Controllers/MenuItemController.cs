@@ -7,14 +7,9 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MenuItemsController : ControllerBase
+public class MenuItemsController(AppDbContext db) : ControllerBase
 {
-    private readonly AppDbContext _db;
-
-    public MenuItemsController(AppDbContext db)
-    {
-        _db = db;
-    }
+    private readonly AppDbContext _db = db;
 
     [HttpGet]
     public IActionResult GetAll()
