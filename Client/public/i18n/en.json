@@ -17,6 +17,16 @@
   },
   "login": {
     "title": "Login to your account",
+    "button": "Sign in",
+    "signingIn": "Signing in...",
+    "error": {
+      "signInFailed": "Unable to log in right now. Please try again."
+    },
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "passwordRequired": "Password is required"
+    },
     "createAccount": "Don't have an account?",
     "signUp": "Sign up",
     "label": {
@@ -33,6 +43,19 @@
     "alreadyHaveAccount": "Already have an account?",
     "login": "Login",
     "button": "Register",
+    "creatingAccount": "Creating account...",
+    "error": {
+      "createFailed": "Could not create account"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match"
+    },
     "label": {
       "name": "Name",
       "email": "Email",

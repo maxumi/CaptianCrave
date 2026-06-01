@@ -1,6 +1,10 @@
 <form class="auth-card" *transloco="let t" [formRoot]="registerForm">
   <h2>{{ t("register.title") }}</h2>
 
+  @if (registerError()) {
+    <p class="error">{{ registerError() }}</p>
+  }
+
   <label class="form-label">{{ t("register.label.name") }}</label>
   <input
     class="form-input"
@@ -68,8 +72,12 @@
     </ul>
   }
 
-  <button class="form-button" type="submit" [disabled]="registerForm().invalid()">
-    {{ t("register.button") }}
+  <button
+    class="form-button"
+    type="submit"
+    [disabled]="registerForm().invalid() || isSubmitting()"
+  >
+    {{ isSubmitting() ? t("register.creatingAccount") : t("register.button") }}
   </button>
 
   <div class="form-link">

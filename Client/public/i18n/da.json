@@ -18,6 +18,15 @@
   "login": {
     "title": "Log ind på din konto",
     "button": "Log ind",
+    "signingIn": "Logger ind...",
+    "error": {
+      "signInFailed": "Kan ikke logge ind lige nu. Prøv igen."
+    },
+    "validation": {
+      "emailRequired": "Email er påkrævet",
+      "emailInvalid": "Indtast en gyldig emailadresse",
+      "passwordRequired": "Adgangskode er påkrævet"
+    },
     "createAccount": "Har du ikke en konto?",
     "signUp": "Opret konto",
     "label": {
@@ -34,6 +43,19 @@
     "alreadyHaveAccount": "Har du allerede en konto?",
     "login": "Log ind",
     "button": "Opret konto",
+    "creatingAccount": "Opretter konto...",
+    "error": {
+      "createFailed": "Kunne ikke oprette konto"
+    },
+    "validation": {
+      "nameRequired": "Navn er påkrævet",
+      "emailRequired": "Email er påkrævet",
+      "emailInvalid": "Indtast en gyldig email",
+      "passwordRequired": "Adgangskode er påkrævet",
+      "passwordMinLength": "Adgangskoden skal være mindst 8 tegn",
+      "confirmPasswordRequired": "Bekræft venligst din adgangskode",
+      "passwordMismatch": "Adgangskoderne matcher ikke"
+    },
     "label": {
       "name": "Navn",
       "email": "Email",

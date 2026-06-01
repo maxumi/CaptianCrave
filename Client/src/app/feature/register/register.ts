@@ -5,13 +5,13 @@ import {
   email,
   minLength,
   validate,
-  submit,
   FormField,
   FormRoot,
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth/auth.service';
+import { getAuthErrorMessage } from '../../shared/getAuthErrorMessage';
 import { firstValueFrom } from 'rxjs';
 
 interface RegisterFormData {
@@ -29,7 +29,9 @@ interface RegisterFormData {
 })
 export class Register {
   authService = inject(AuthService);
+  private readonly translocoService = inject(TranslocoService);
 
+  readonly isSubmitting = signal(false);
   readonly registerError = signal<string | null>(null);
   private readonly router = inject(Router);
 
@@ -43,25 +45,33 @@ export class Register {
 registerForm = form(
   this.registerModel,
   (schemaPath) => {
-    required(schemaPath.name, { message: 'Name is required' });
+    required(schemaPath.name, {
+      message: this.translocoService.translate('register.validation.nameRequired'),
+    });
 
-    required(schemaPath.email, { message: 'Email is required' });
-    email(schemaPath.email, { message: 'Enter a valid email' });
+    required(schemaPath.email, {
+      message: this.translocoService.translate('register.validation.emailRequired'),
+    });
+    email(schemaPath.email, {
+      message: this.translocoService.translate('register.validation.emailInvalid'),
+    });
 
-    required(schemaPath.password, { message: 'Password is required' });
+    required(schemaPath.password, {
+      message: this.translocoService.translate('register.validation.passwordRequired'),
+    });
     minLength(schemaPath.password, 8, {
-      message: 'Password must be at least 8 characters',
+      message: this.translocoService.translate('register.validation.passwordMinLength'),
     });
 
     required(schemaPath.confirmPassword, {
-      message: 'Please confirm your password',
+      message: this.translocoService.translate('register.validation.confirmPasswordRequired'),
     });
 
     validate(schemaPath.confirmPassword, ({ value, valueOf }) => {
       if (value() !== valueOf(schemaPath.password)) {
         return {
           kind: 'passwordMismatch',
-          message: 'Passwords do not match',
+          message: this.translocoService.translate('register.validation.passwordMismatch'),
         };
       }
 
@@ -71,11 +81,10 @@ registerForm = form(
   {
     submission: {
       action: async () => {
-        // Clear old register errors before trying again.
         this.registerError.set(null);
+        this.isSubmitting.set(true);
 
         try {
-          // Send the form values to the auth service.
           await firstValueFrom(
             this.authService.register({
               name: this.registerForm.name().value(),
@@ -84,20 +93,23 @@ registerForm = form(
             }),
           );
 
-          // Go to login page after successful registration.
-          await this.router.navigate(['/login']);
+          await this.router.navigate(['/']);
 
-          // No submission error.
           return null;
-        } catch {
-          // Show a general register error.
-          this.registerError.set('Could not create account');
+        } catch (error) {
+          const message = getAuthErrorMessage(
+            error,
+            this.translocoService.translate('register.error.createFailed'),
+          );
 
-          // Tell the form that submission failed.
+          this.registerError.set(message);
+
           return {
             kind: 'serverError',
-            message: 'Could not create account',
+            message,
           };
+        } finally {
+          this.isSubmitting.set(false);
         }
       },
     },

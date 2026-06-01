@@ -34,8 +34,12 @@
       <p class="error">{{ loginError() }}</p>
     }
 
-    <button class="form-button" type="submit" [disabled]="isSubmitting()">
-      Login
+    <button
+      class="form-button"
+      type="submit"
+      [disabled]="loginForm().invalid() || isSubmitting()"
+    >
+      {{ isSubmitting() ? t("login.signingIn") : t("login.button") }}
     </button>
   </form>
 
