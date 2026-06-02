@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Backend.Data.Configurations;
 
+// Configures the menu_items table columns, constraints and relationships
 public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 {
     public void Configure(EntityTypeBuilder<MenuItem> builder)
@@ -16,6 +17,14 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             .HasColumnName("id")
             .ValueGeneratedOnAdd();
 
+        builder.Property(m => m.RestaurantId)
+            .HasColumnName("restaurant_id")
+            .IsRequired();
+
+        builder.Property(m => m.CategoryId)
+            .HasColumnName("category_id")
+            .IsRequired();
+
         builder.Property(m => m.Name)
             .HasColumnName("name")
             .IsRequired()
@@ -23,7 +32,6 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
 
         builder.Property(m => m.Description)
             .HasColumnName("description")
-            .IsRequired()
             .HasMaxLength(500);
 
         builder.Property(m => m.Price)
@@ -31,8 +39,18 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             .HasPrecision(10, 2)
             .IsRequired();
 
-        builder.Property(m => m.RestaurantId)
-            .HasColumnName("restaurant_id")
-            .IsRequired();
+        builder.Property(m => m.ImageUrl)
+            .HasColumnName("image_url")
+            .HasMaxLength(500);
+
+        builder.Property(m => m.IsAvailable)
+            .HasColumnName("is_available")
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.HasOne(m => m.Category)
+            .WithMany(c => c.MenuItems)
+            .HasForeignKey(m => m.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
