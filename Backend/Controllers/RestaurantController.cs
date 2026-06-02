@@ -20,6 +20,9 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
     [HttpPost]
     public IActionResult Create(CreateRestaurantDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var restaurant = new Restaurant
         {
             Name = dto.Name,

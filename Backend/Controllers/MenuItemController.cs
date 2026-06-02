@@ -20,6 +20,9 @@ public class MenuItemsController(AppDbContext db) : ControllerBase
     [HttpPost]
     public IActionResult Create(CreateMenuItemDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+            
         var restaurant = _db.Restaurants.Find(dto.RestaurantId);
 
         if (restaurant == null)
