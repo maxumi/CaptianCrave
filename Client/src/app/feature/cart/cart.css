@@ -1,0 +1,26 @@
+.page {
+  padding: 32px 16px;
+}
+
+.cart-card {
+  max-width: 720px;
+  margin: 48px auto;
+  padding: 24px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.cart-card h1 {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.cart-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-muted);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+}

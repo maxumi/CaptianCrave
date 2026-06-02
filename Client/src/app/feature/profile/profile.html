@@ -1,0 +1,26 @@
+<div class="profile-page">
+  <div class="profile-card">
+    <h2>Profile</h2>
+
+    <div class="profile-info">
+      <p><strong>Name:</strong> {{ name() }}</p>
+      <p><strong>Address:</strong> {{ address() }}</p>
+    </div>
+
+    <label for="address">Change address</label>
+
+    <input
+      id="address"
+      class="form-input"
+      type="text"
+      placeholder="Enter new address"
+      [(ngModel)]="addressInput"
+    />
+
+    <button class="form-button" type="button" (click)="saveAddress()">
+      Save address
+    </button>
+
+    <div id="profile-map"></div>
+  </div>
+</div>
