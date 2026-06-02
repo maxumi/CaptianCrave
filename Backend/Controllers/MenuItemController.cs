@@ -1,44 +1,32 @@
-using Backend.Data;
 using Backend.DTOs;
-using Backend.Models;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+// Handles HTTP requests for menu item resources.
 [ApiController]
 [Route("api/[controller]")]
-public class MenuItemsController(AppDbContext db) : ControllerBase
+public class MenuItemsController(IMenuItemService menuItemService) : ControllerBase
 {
-    private readonly AppDbContext _db = db;
+    private readonly IMenuItemService _menuItemService = menuItemService;
 
-    [HttpGet]
-    public IActionResult GetAll()
+    // Returns all menu items belonging to the specified restaurant.
+    [HttpGet("by-restaurant/{restaurantId}")]
+    public async Task<IActionResult> GetByRestaurant(int restaurantId)
     {
-        return Ok(_db.MenuItems.ToList());
+        var items = await _menuItemService.GetByRestaurantIdAsync(restaurantId);
+        return Ok(items);
     }
 
+    // Creates a new menu item and returns it with a 201 status.
     [HttpPost]
-    public IActionResult Create(CreateMenuItemDto dto)
+    public async Task<IActionResult> Create(CreateMenuItemDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-            
-        var restaurant = _db.Restaurants.Find(dto.RestaurantId);
 
-        if (restaurant == null)
-            return BadRequest("Restaurant not found");
-
-        var menuItem = new MenuItem
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            RestaurantId = dto.RestaurantId
-        };
-
-        _db.MenuItems.Add(menuItem);
-        _db.SaveChanges();
-
-        return Ok(menuItem);
+        var created = await _menuItemService.CreateAsync(dto);
+        return Created(string.Empty, created);
     }
 }

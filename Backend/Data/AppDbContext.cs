@@ -13,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Restaurant> Restaurants { get; set; }
 
+    public DbSet<Category> Categories { get; set; }
+
     public DbSet<MenuItem> MenuItems { get; set; }
 
     public DbSet<Order> Orders { get; set; }
@@ -24,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new RestaurantConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new MenuItemConfiguration());
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());

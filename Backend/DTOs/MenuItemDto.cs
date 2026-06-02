@@ -1,7 +1,6 @@
-namespace Backend.Models;
+namespace Backend.DTOs;
 
-// Represents a single item on a restaurant's menu
-public class MenuItem
+public class MenuItemDto
 {
     public int Id { get; set; }
     public int RestaurantId { get; set; }
@@ -10,9 +9,5 @@ public class MenuItem
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
-    public bool IsAvailable { get; set; } = true;
-
-    // Navigation properties
-    public Restaurant Restaurant { get; set; } = null!;
-    public Category Category { get; set; } = null!;
+    public bool IsAvailable { get; set; }
 }
