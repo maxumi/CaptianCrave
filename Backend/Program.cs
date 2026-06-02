@@ -28,10 +28,18 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-// DI
+// DI — Auth
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+// DI — Restaurant / Category / MenuItem
+builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
+builder.Services.AddScoped<IRestaurantService, RestaurantService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IMenuItemService, MenuItemService>();
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"]

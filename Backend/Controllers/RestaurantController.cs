@@ -1,49 +1,43 @@
-using Backend.Data;
 using Backend.DTOs;
-using Backend.Models;
+using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+// Handles HTTP requests for restaurant resources.
 [ApiController]
 [Route("api/[controller]")]
-public class RestaurantsController(AppDbContext db) : ControllerBase
+public class RestaurantsController(IRestaurantService restaurantService) : ControllerBase
 {
-    private readonly AppDbContext _db = db;
+    private readonly IRestaurantService _restaurantService = restaurantService;
 
+    // Returns every restaurant.
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(_db.Restaurants.ToList());
+        var restaurants = await _restaurantService.GetAllAsync();
+        return Ok(restaurants);
     }
 
-    [HttpPost]
-    public IActionResult Create(CreateRestaurantDto dto)
+    // Returns a single restaurant by ID, or 404 if not found.
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var restaurant = new Restaurant
-        {
-            Name = dto.Name,
-            Address = dto.Address,
-            Latitude = dto.Latitude,
-            Longitude = dto.Longitude
-        };
-
-        _db.Restaurants.Add(restaurant);
-        _db.SaveChanges();
+        var restaurant = await _restaurantService.GetByIdAsync(id);
+        if (restaurant is null)
+            return NotFound();
 
         return Ok(restaurant);
     }
 
-    [HttpGet("{id}/menu-items")]
-    public IActionResult GetMenuItems(int id)
+    // Creates a new restaurant and returns it with a 201 status.
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateRestaurantDto dto)
     {
-        var menuItems = _db.MenuItems
-            .Where(m => m.RestaurantId == id)
-            .ToList();
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        return Ok(menuItems);
+        var created = await _restaurantService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 }
