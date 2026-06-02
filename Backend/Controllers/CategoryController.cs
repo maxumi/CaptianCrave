@@ -13,7 +13,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
     private readonly ICategoryService _categoryService = categoryService;
 
     // Returns all categories belonging to the specified restaurant.
-    [HttpGet("by-restaurant/{restaurantId}")]
+    [HttpGet("restaurant/{restaurantId}")]
     public async Task<IActionResult> GetByRestaurant(int restaurantId)
     {
         var categories = await _categoryService.GetByRestaurantIdAsync(restaurantId);

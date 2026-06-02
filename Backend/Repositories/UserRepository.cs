@@ -7,6 +7,10 @@ namespace Backend.Repositories;
 // Handles all database queries for the users table
 public class UserRepository(AppDbContext db) : IUserRepository
 {
+    // Returns the user with the given id, or null if not found
+    public Task<User?> GetByIdAsync(int id) =>
+        db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+
     // Returns the user with the given email, or null if not found
     public Task<User?> GetByEmailAsync(string email) =>
         db.Users.FirstOrDefaultAsync(u => u.Email == email);

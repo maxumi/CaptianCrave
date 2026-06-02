@@ -13,7 +13,7 @@ public class MenuItemsController(IMenuItemService menuItemService) : ControllerB
     private readonly IMenuItemService _menuItemService = menuItemService;
 
     // Returns all menu items belonging to the specified restaurant.
-    [HttpGet("by-restaurant/{restaurantId}")]
+    [HttpGet("restaurant/{restaurantId}")]
     public async Task<IActionResult> GetByRestaurant(int restaurantId)
     {
         var items = await _menuItemService.GetByRestaurantIdAsync(restaurantId);
