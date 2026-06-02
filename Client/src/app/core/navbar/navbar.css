@@ -108,7 +108,7 @@
 
 .auth-buttons button:hover {
   background-color: #ffffff;
-  color: #b21919;
+  color: black;
   box-shadow: 0 2px 5px rgba(178, 25, 25, 0.5);
 }
 
@@ -126,7 +126,7 @@
 }
 
 .language-select select:hover {
-  border-color: #b21919;
+  border-color: var(--color-primary);
   box-shadow: 0 2px 5px rgba(178, 25, 25, 0.25);
 }
 
@@ -139,4 +139,21 @@
   color: #222;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.profile-btn mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
 }
