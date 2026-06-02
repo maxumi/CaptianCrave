@@ -1,5 +1,6 @@
 using Backend.DTOs;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -21,6 +22,7 @@ public class MenuItemsController(IMenuItemService menuItemService) : ControllerB
 
     // Creates a new menu item and returns it with a 201 status.
     [HttpPost]
+    [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> Create(CreateMenuItemDto dto)
     {
         if (!ModelState.IsValid)
