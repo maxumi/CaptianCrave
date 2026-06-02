@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.DTOs;
 using Backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ public class OrdersController(AppDbContext db) : ControllerBase
 
     // POST: api/orders
     [HttpPost]
+    [Authorize(Roles = "Customer,Admin")]
     public IActionResult Create(CreateOrderDto dto)
     {
         // 1. Validate cart
@@ -80,6 +82,7 @@ public class OrdersController(AppDbContext db) : ControllerBase
 
     // GET: api/orders/{id}
     [HttpGet("{id}")]
+    [Authorize]
     public IActionResult GetById(int id)
     {
         var order = _db.Orders

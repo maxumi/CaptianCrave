@@ -1,5 +1,6 @@
 using Backend.DTOs;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
@@ -32,6 +33,7 @@ public class RestaurantsController(IRestaurantService restaurantService) : Contr
 
     // Creates a new restaurant and returns it with a 201 status.
     [HttpPost]
+    [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> Create(CreateRestaurantDto dto)
     {
         if (!ModelState.IsValid)
