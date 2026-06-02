@@ -26,7 +26,9 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         var restaurant = new Restaurant
         {
             Name = dto.Name,
-            Address = dto.Address
+            Address = dto.Address,
+            Latitude = dto.Latitude,
+            Longitude = dto.Longitude
         };
 
         _db.Restaurants.Add(restaurant);

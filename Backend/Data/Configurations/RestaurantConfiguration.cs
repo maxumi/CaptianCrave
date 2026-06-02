@@ -26,6 +26,14 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             .IsRequired()
             .HasMaxLength(255);
 
+        builder.Property(r => r.Latitude)
+            .HasColumnName("latitude")
+            .IsRequired();
+
+        builder.Property(r => r.Longitude)
+            .HasColumnName("longitude")
+            .IsRequired();
+
         builder.HasMany(r => r.MenuItems)
             .WithOne(m => m.Restaurant)
             .HasForeignKey(m => m.RestaurantId)
