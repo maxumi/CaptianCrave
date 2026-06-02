@@ -1,18 +1,18 @@
 <section class="home-page">
-  <div class="home-card">
+  <div class="home-card card">
     <h1>Captain Crave</h1>
     <p>Simple food discovery app for browsing restaurants and checking details.</p>
 
     @if (authService.user(); as user) {
-      <p class="status">Signed in as {{ user.name }}</p>
+      <p class="signed-in">Signed in as {{ user.name }}</p>
 
-      <div class="actions">
-        <a routerLink="/restaurants">View restaurants</a>
+      <div class="home-actions">
+        <a class="btn" routerLink="/restaurants">View restaurants</a>
       </div>
     } @else {
-      <div class="actions">
-        <a routerLink="/login">Login</a>
-        <a routerLink="/register">Register</a>
+      <div class="home-actions">
+        <a class="btn" routerLink="/login">Login</a>
+        <a class="btn" routerLink="/register">Register</a>
       </div>
     }
   </div>

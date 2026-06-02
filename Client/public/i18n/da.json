@@ -57,10 +57,15 @@
       "passwordMismatch": "Adgangskoderne matcher ikke"
     },
     "label": {
+      "role": "Rolle",
       "name": "Navn",
       "email": "Email",
       "password": "Adgangskode",
       "confirmPassword": "Bekræft adgangskode"
+    },
+    "role": {
+      "customer": "Kunde",
+      "restaurant": "Restaurant"
     },
     "placeholder": {
       "name": "Indtast dit navn",

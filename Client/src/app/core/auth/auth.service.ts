@@ -4,11 +4,16 @@ import { tap } from 'rxjs';
 import { AuthState } from '../../shared/models/user';
 import { environment } from '../../../environments/environment';
 
+export enum Role {
+  Customer = 'customer',
+  Restaurant = 'restaurant',
+}
 
 interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  role: Role;
 }
 
 interface LoginRequest {

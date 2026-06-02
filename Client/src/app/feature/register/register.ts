@@ -10,15 +10,18 @@ import {
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthService, Role } from '../../core/auth/auth.service';
 import { getAuthErrorMessage } from '../../shared/getAuthErrorMessage';
 import { firstValueFrom } from 'rxjs';
+
+
 
 interface RegisterFormData {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
+  role: Role;
 }
 
 @Component({
@@ -34,13 +37,14 @@ export class Register {
   readonly isSubmitting = signal(false);
   readonly registerError = signal<string | null>(null);
   private readonly router = inject(Router);
-
+  readonly Role = Role;
 
   registerModel = signal<RegisterFormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: Role.Customer,
   });
 registerForm = form(
   this.registerModel,
@@ -66,6 +70,9 @@ registerForm = form(
     required(schemaPath.confirmPassword, {
       message: this.translocoService.translate('register.validation.confirmPasswordRequired'),
     });
+    required(schemaPath.role, {
+      message: this.translocoService.translate('register.validation.roleRequired'),
+    });
 
     validate(schemaPath.confirmPassword, ({ value, valueOf }) => {
       if (value() !== valueOf(schemaPath.password)) {
@@ -90,6 +97,7 @@ registerForm = form(
               name: this.registerForm.name().value(),
               email: this.registerForm.email().value(),
               password: this.registerForm.password().value(),
+              role: this.registerForm.role().value(),
             }),
           );
 

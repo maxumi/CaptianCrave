@@ -57,10 +57,15 @@
       "passwordMismatch": "Passwords do not match"
     },
     "label": {
+      "role": "Role",
       "name": "Name",
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm password"
+    },
+    "role": {
+      "customer": "Customer",
+      "restaurant": "Restaurant"
     },
     "placeholder": {
       "name": "Enter your name",
