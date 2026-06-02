@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { map, Observable, of } from 'rxjs';
 
 export interface LocationResult {
   lat: number;
@@ -31,79 +33,44 @@ interface OverpassElement {
   };
 }
 
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+
 @Injectable({
   providedIn: 'root',
 })
 export class LocationService {
+  private readonly http = inject(HttpClient);
+
   readonly defaultLocation: LocationResult = {
-    lat: 55.6541,
-    lng: 12.4166,
-    label: 'Brøndby, Denmark',
+    lat: 55.6761,
+    lng: 12.5683,
+    label: 'Copenhagen, Denmark',
   };
 
-  getCurrentLocation(): Promise<LocationResult> {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(this.defaultLocation);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            label: 'Your current location',
-          });
-        },
-        () => {
-          resolve(this.defaultLocation);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        }
-      );
-    });
-  }
-
-  async geocodeAddress(address: string): Promise<LocationResult | null> {
+  geocodeAddress(address: string): Observable<LocationResult | null> {
     const trimmedAddress = address.trim();
 
     if (!trimmedAddress) {
-      return null;
+      return of(null);
     }
 
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-      trimmedAddress
-    )}&limit=1`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error('Could not find address.');
-    }
-
-    const results: NominatimResult[] = await response.json();
-
-    if (results.length === 0) {
-      return null;
-    }
-
-    return {
-      lat: Number(results[0].lat),
-      lng: Number(results[0].lon),
-      label: results[0].display_name,
-    };
+    return this.http
+      .get<NominatimResult[]>(NOMINATIM_URL, {
+        params: {
+          format: 'json',
+          q: trimmedAddress,
+          limit: 1,
+        },
+      })
+      .pipe(map((results) => this.toLocationResult(results[0])));
   }
 
-  /** Test method to fetch nearby restaurants using Overpass API */
-  async getNearbyRestaurants(
+  getNearbyRestaurants(
     lat: number,
     lng: number,
     radius = 1000
-  ): Promise<Restaurant[]> {
+  ): Observable<Restaurant[]> {
     const query = `
       [out:json][timeout:25];
       (
@@ -112,25 +79,42 @@ export class LocationService {
       out body;
     `;
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: query,
-    });
+    return this.http
+      .post<{ elements: OverpassElement[] }>(OVERPASS_URL, query, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+      .pipe(
+        map((data) =>
+          data.elements
+            .filter((element) => element.lat != null && element.lon != null)
+            .map((element) => this.toRestaurant(element))
+        )
+      );
+  }
 
-    if (!response.ok) {
-      throw new Error('Could not fetch restaurants.');
+  private toLocationResult(
+    result: NominatimResult | undefined
+  ): LocationResult | null {
+    if (!result) {
+      return null;
     }
 
-    const data: { elements: OverpassElement[] } = await response.json();
+    return {
+      lat: Number(result.lat),
+      lng: Number(result.lon),
+      label: result.display_name,
+    };
+  }
 
-    return data.elements
-      .filter((restaurant) => restaurant.lat && restaurant.lon)
-      .map((restaurant) => ({
-        id: restaurant.id,
-        lat: restaurant.lat as number,
-        lng: restaurant.lon as number,
-        name: restaurant.tags?.name ?? 'Unnamed restaurant',
-        cuisine: restaurant.tags?.cuisine,
-      }));
+  private toRestaurant(element: OverpassElement): Restaurant {
+    return {
+      id: element.id,
+      lat: element.lat as number,
+      lng: element.lon as number,
+      name: element.tags?.name ?? 'Unnamed restaurant',
+      cuisine: element.tags?.cuisine,
+    };
   }
 }

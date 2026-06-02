@@ -19,7 +19,7 @@ import {
 })
 export class Profile implements AfterViewInit {
   name = signal('Max');
-  address = signal('Brøndby, Denmark');
+  address = signal('Copenhagen, Denmark');
   addressInput = signal(this.address());
 
   private map!: L.Map;
@@ -33,59 +33,49 @@ export class Profile implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const brondby: L.LatLngExpression = [
+    const location: L.LatLngExpression = [
       this.defaultLocation.lat,
       this.defaultLocation.lng,
     ];
 
-    this.map = L.map('profile-map').setView(brondby, 13);
+    this.map = L.map('profile-map').setView(location, 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
 
-    this.marker = L.marker(brondby)
+    this.marker = L.marker(location)
       .addTo(this.map)
       .bindPopup(`Default location: ${this.defaultLocation.label}`);
 
     setTimeout(() => {
       this.map.invalidateSize();
     }, 0);
-
-    this.useUserLocationOrDefault();
   }
 
-  async saveAddress(): Promise<void> {
+  saveAddress(): void {
     const trimmedAddress = this.addressInput().trim();
 
     if (!trimmedAddress) {
       return;
     }
 
-    try {
-      const location = await this.locationService.geocodeAddress(trimmedAddress);
+    this.locationService.geocodeAddress(trimmedAddress).subscribe({
+      next: (location) => {
+        if (!location) {
+          console.error('No address found.');
+          return;
+        }
 
-      if (!location) {
-        console.error('No address found.');
-        return;
-      }
+        this.address.set(trimmedAddress);
+        this.addressInput.set(trimmedAddress);
 
-      this.address.set(trimmedAddress);
-      this.addressInput.set(trimmedAddress);
-
-      this.updateLocation(location, location.label);
-    } catch (error) {
-      console.error('Error saving address:', error);
-    }
-  }
-
-  private async useUserLocationOrDefault(): Promise<void> {
-    const location = await this.locationService.getCurrentLocation();
-
-    this.address.set(location.label);
-    this.addressInput.set(location.label);
-
-    this.updateLocation(location, location.label);
+        this.updateLocation(location, location.label);
+      },
+      error: (error) => {
+        console.error('Error saving address:', error);
+      },
+    });
   }
 
   private updateLocation(
@@ -102,15 +92,11 @@ export class Profile implements AfterViewInit {
     this.loadRestaurants(location.lat, location.lng);
   }
 
-  private async loadRestaurants(lat: number, lng: number): Promise<void> {
-    this.clearRestaurantMarkers();
+private loadRestaurants(lat: number, lng: number): void {
+  this.clearRestaurantMarkers();
 
-    try {
-      const restaurants = await this.locationService.getNearbyRestaurants(
-        lat,
-        lng
-      );
-
+  this.locationService.getNearbyRestaurants(lat, lng).subscribe({
+    next: (restaurants) => {
       restaurants.forEach((restaurant) => {
         const restaurantPopupText = this.getRestaurantPopupText(restaurant);
 
@@ -120,10 +106,12 @@ export class Profile implements AfterViewInit {
 
         this.restaurantMarkers.push(restaurantMarker);
       });
-    } catch (error) {
+    },
+    error: (error) => {
       console.error('Error loading restaurants:', error);
-    }
-  }
+    },
+  });
+}
 
   private getRestaurantPopupText(restaurant: Restaurant): string {
     return restaurant.cuisine
