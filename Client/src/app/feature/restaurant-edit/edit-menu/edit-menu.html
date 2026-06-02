@@ -1,0 +1,80 @@
+<header class="menu-header">
+  <div>
+    <h1>Manage Menu</h1>
+    <p>Add, edit or remove menu items from your restaurant</p>
+  </div>
+
+  <button type="button" class="btn add-btn">+ Add New Item</button>
+</header>
+
+<section class="menu-filters" aria-label="Menu filters">
+  <label class="menu-search">
+    <span class="sr-only">Search menu items</span>
+    <input class="form-control" type="search" placeholder="Search Menu Items" />
+  </label>
+</section>
+
+<section class="menu-table card" aria-label="Menu items">
+  <div class="table-head">
+    <span>Item</span>
+    <span>Price</span>
+    <span>Status</span>
+    <span>Action</span>
+  </div>
+
+  @for (item of menuItems; track item.id) {
+    <div class="table-row" [class.selected]="selectedItem()?.id === item.id">
+      <div class="item-cell">
+        <img [src]="item.imageUrl" [alt]="item.name" />
+        <strong>{{ item.name }}</strong>
+      </div>
+
+      <span>{{ item.price }}{{ item.currency }}</span>
+
+      <span>
+        <span class="status" [class.out]="!item.inStock">
+          {{ item.inStock ? 'In Stock' : 'Out of Stock' }}
+        </span>
+      </span>
+
+      <div class="actions">
+        <button type="button" class="btn" (click)="selectItem(item)">View</button>
+      </div>
+    </div>
+  }
+</section>
+
+@if (selectedItem()) {
+  <form class="item-details card" [formRoot]="menuForm" (submit)="saveItem()">
+    <header>
+      <div>
+        <h2>Edit {{ menuModel().name }}</h2>
+        <p>Update menu item details</p>
+      </div>
+
+      <button type="submit" class="btn save-btn">Save Changes</button>
+    </header>
+
+    <div class="edit-form">
+      <label>
+        Name
+        <input class="form-control" type="text" [formField]="menuForm.name" />
+      </label>
+
+      <label>
+        Price
+        <input class="form-control" type="number" [formField]="menuForm.price" />
+      </label>
+
+      <label>
+        Currency
+        <input class="form-control" type="text" [formField]="menuForm.currency" />
+      </label>
+
+      <label class="checkbox-field">
+        <input type="checkbox" [formField]="menuForm.inStock" />
+        In Stock
+      </label>
+    </div>
+  </form>
+}

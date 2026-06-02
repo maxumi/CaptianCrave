@@ -1,0 +1,86 @@
+<header class="menu-header">
+  <div>
+    <h1>Manage Orders</h1>
+    <p>View and update customer order statuses</p>
+  </div>
+</header>
+
+<section class="menu-table card" aria-label="Restaurant orders">
+  <div class="table-head order-head">
+    <span>Order</span>
+    <span>Customer</span>
+    <span>Total</span>
+    <span>Status</span>
+    <span>Action</span>
+  </div>
+
+  @for (order of orders; track order.id) {
+    <div class="table-row order-row" [class.selected]="selectedOrder()?.id === order.id">
+      <div>
+        <strong>#{{ order.code }}</strong>
+        <p>{{ order.date }}</p>
+      </div>
+
+      <span>{{ order.customer }}</span>
+      <span>{{ order.total }}{{ order.currency }}</span>
+
+      <span>
+        <span class="status" [class.out]="order.status === 'Cancelled'">
+          {{ order.status }}
+        </span>
+      </span>
+
+      <div class="actions">
+        <button type="button" class="btn" (click)="selectOrder(order)">View</button>
+      </div>
+    </div>
+  }
+</section>
+
+@if (selectedOrder()) {
+  <form class="order-details card" [formRoot]="orderForm" (submit)="saveOrder()">
+    <header>
+      <div>
+        <h2>Order #{{ orderModel().code }}</h2>
+        <p>{{ orderModel().date }}</p>
+      </div>
+
+      <button type="submit" class="btn save-btn">Save Changes</button>
+    </header>
+
+    <div class="edit-form">
+      <label>
+        Customer
+        <input class="form-control" type="text" [formField]="orderForm.customer" />
+      </label>
+
+      <label>
+        Total
+        <input class="form-control" type="number" [formField]="orderForm.total" />
+      </label>
+
+      <label>
+        Status
+        <select class="form-control" [formField]="orderForm.status">
+          <option value="Pending">Pending</option>
+          <option value="Preparing">Preparing</option>
+          <option value="On the way">On the way</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="order-items">
+      <h3>Items</h3>
+
+      @for (item of orderModel().items; track $index; let i = $index) {
+        <div class="order-item">
+          <input class="form-control" type="number" [formField]="orderForm.items[i].quantity" />
+          <input class="form-control" type="text" [formField]="orderForm.items[i].name" />
+          <input class="form-control" type="number" [formField]="orderForm.items[i].price" />
+        </div>
+      }
+    </div>
+  </form>
+}
