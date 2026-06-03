@@ -1,3 +1,7 @@
+export enum Role {
+  Customer = 'customer',
+  Restaurant = 'restaurant',
+}
 export interface AuthState {
   userId: number;
   name: string;

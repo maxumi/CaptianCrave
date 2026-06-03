@@ -10,9 +10,10 @@ import {
 } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { AuthService, Role } from '../../core/auth/auth.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { getAuthErrorMessage } from '../../shared/getAuthErrorMessage';
 import { firstValueFrom } from 'rxjs';
+import { Role } from '../../shared/models/user';
 
 
 
