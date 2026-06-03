@@ -2,7 +2,8 @@
 .item-details header,
 .menu-filters,
 .item-cell,
-.actions {
+.actions,
+.detail-actions {
   display: flex;
 }
 
@@ -29,7 +30,9 @@
   color: var(--color-muted);
 }
 
-.menu-filters {
+.menu-filters,
+.actions,
+.detail-actions {
   gap: 12px;
 }
 
@@ -66,8 +69,12 @@
   background-color: #f8f8f8;
 }
 
-.item-cell {
+.item-cell,
+.detail-actions {
   align-items: center;
+}
+
+.item-cell {
   gap: 12px;
 }
 
@@ -76,10 +83,6 @@
   height: 52px;
   object-fit: cover;
   border-radius: 8px;
-}
-
-.actions {
-  gap: 12px;
 }
 
 .item-details {
@@ -101,18 +104,43 @@
   color: var(--color-dark);
 }
 
+/* fixes checkbox and overrites flex direction */
+
 .checkbox-field {
-  justify-content: center;
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 24px;
 }
 
 .checkbox-field input {
   width: auto;
+  margin: 0;
+}
+
+.save-btn,
+.delete-btn {
+  min-width: 130px;
+}
+
+.delete-btn {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger);
+  color: var(--color-white);
+}
+
+.delete-btn:hover {
+  background-color: var(--color-white);
+  color: var(--color-danger);
 }
 
 @media (max-width: 760px) {
   .menu-header,
   .menu-filters,
-  .item-details header {
+  .item-details header,
+  .detail-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
@@ -125,5 +153,10 @@
   .table-row,
   .edit-form {
     grid-template-columns: 1fr;
+  }
+
+  .save-btn,
+  .delete-btn {
+    width: 100%;
   }
 }
