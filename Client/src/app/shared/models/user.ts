@@ -1,6 +1,6 @@
 export enum Role {
-  Customer = 'customer',
-  Restaurant = 'restaurant',
+  Customer = 'Customer',
+  Restaurant = 'Restaurant',
 }
 export interface AuthState {
   userId: number;
