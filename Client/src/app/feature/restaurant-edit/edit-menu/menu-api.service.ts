@@ -47,7 +47,7 @@ export class MenuApiService {
     return this.http.get<RestaurantDto>(`${this.restaurantsUrl}/me`);
   }
 
-  getByRestaurant(restaurantId: number): Observable<MenuItemDto[]> {
+  getMenuItemsByRestaurant(restaurantId: number): Observable<MenuItemDto[]> {
     return this.http.get<MenuItemDto[]>(`${this.menuItemsUrl}/restaurant/${restaurantId}`);
   }
 

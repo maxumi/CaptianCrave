@@ -1,271 +1,130 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { MatDialog } from '@angular/material/dialog';
-import { EMPTY, MonoTypeOperatorFunction, firstValueFrom } from 'rxjs';
-import { catchError, finalize, switchMap } from 'rxjs/operators';
+import {
+  catchError,
+  firstValueFrom,
+  map,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+
 import { DeleteDialog } from './delete-dialog/delete-dialog';
 import { SaveDialog } from './save-dialog/save-dialog';
-import { MenuApiService, MenuItemDto, UpdateMenuItemRequest } from './menu-api.service';
-
-interface MenuItem {
-  id: number;
-  restaurantId: number;
-  categoryId: number | null;
-  name: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  currency: string;
-  inStock: boolean;
-}
+import { MenuEditStore } from './menu-edit-store';
+import { MenuItem } from './edit-menu.models';
 
 @Component({
   selector: 'app-edit-menu',
   imports: [FormField, FormRoot],
   templateUrl: './edit-menu.html',
   styleUrl: './edit-menu.css',
+
+  // Provides a store instance for this component.
+  // prevents menu edit state from leaking into other pages.
+  providers: [MenuEditStore],
 })
 export class EditMenu implements OnInit {
-  // Dialog Config to be reused for both Save and Delete confirmation dialog components
+  // Shared dialog settings for save and delete confirmation dialogs.
   private static readonly DIALOG_CONFIG = {
     width: '250px',
     enterAnimationDuration: '200ms',
     exitAnimationDuration: '150ms',
   };
-  readonly dialog = inject(MatDialog);
-  private readonly menuApiService = inject(MenuApiService);
+
+  private readonly dialog = inject(MatDialog);
+
+  // Store handles menu state, loading, saving, deleting, and errors.
+  readonly store = inject(MenuEditStore);
+
+  // Local form draft.
+  // This is separate from store.selectedItem so changes in the form do not
+  // directly modify the item in the menu list before saving.
+  readonly menuModel = signal<MenuItem>(this.store.createDraftItem());
 
 
-  readonly isCreatingNew = signal<boolean>(false);
-  readonly isSubmitting = signal<boolean>(false);
-  readonly isLoading = signal<boolean>(true);
-  readonly hasNoRestaurant = signal<boolean>(false);
-  readonly errorMessage = signal<string>('');
+  readonly currency = 'kr.';
 
-  readonly menuItems = signal<MenuItem[]>([]);
-  private restaurantId: number | null = null;
-
-  menuModel = signal<MenuItem>(this.createDraftItem());
-  menuForm = form(
+  readonly menuForm = form(
     this.menuModel,
     () => {},
     {
       submission: {
-        action: async () => {
-          this.errorMessage.set('');
-          this.isSubmitting.set(true);
-
-          try {
-            const confirmed = await firstValueFrom(
-              this.dialog.open(SaveDialog, EditMenu.DIALOG_CONFIG).afterClosed(),
-            );
-
-            if (!confirmed) {
-              return null;
-            }
-
-            const updatedItem = this.menuModel();
-            const isCreateMode = this.isCreatingNew() || updatedItem.id === 0;
-
-            const restaurantId = this.requireRestaurantId();
-            if (!restaurantId) {
-              const message = 'Restaurant context is missing. Please refresh and try again.';
-              return {
-                kind: 'serverError' as const,
-                message,
-              };
-            }
-
-            const payload = this.toPayload(updatedItem, restaurantId);
-            const saveRequest = isCreateMode
-              ? this.menuApiService.create(payload)
-              : this.menuApiService.update(updatedItem.id, payload);
-
-            const saved = await firstValueFrom(saveRequest);
-            this.applySavedItem(saved, isCreateMode);
-            return null;
-          } catch {
-            const message = 'Could not save this menu item.';
-            this.errorMessage.set(message);
-            return {
-              kind: 'serverError' as const,
-              message,
-            };
-          } finally {
-            this.isSubmitting.set(false);
-          }
-        },
+        action: () => this.submitMenuForm(),
       },
     },
   );
 
-  selectedItem = signal<MenuItem | null>(null);
-
-
   ngOnInit(): void {
-    this.loadMenuItems();
+    this.store.load();
   }
-
-private loadMenuItems(): void {
-  this.isLoading.set(true);
-  this.errorMessage.set('');
-
-  this.menuApiService.getMyRestaurant().pipe(
-    switchMap(restaurant => {
-      this.restaurantId = restaurant.id;
-      this.hasNoRestaurant.set(false);
-      return this.menuApiService.getByRestaurant(restaurant.id);
-    }),
-
-    catchError((error: { status?: number }) => {
-      if (error.status === 404) {
-        this.hasNoRestaurant.set(true);
-        this.menuItems.set([]);
-      } else {
-        this.errorMessage.set('Failed to load menu items. Please try again.');
-      }
-      // In case of error, return an empty observable.
-      return EMPTY;
-    }),
-
-    finalize(() => {
-      this.isLoading.set(false);
-    }),
-  ).subscribe((items: MenuItemDto[]) => {
-    this.menuItems.set(items.map(item => this.fromDto(item)));
-  });
-}
 
   selectItem(item: MenuItem): void {
-    this.selectedItem.set(item);
-    this.menuModel.set(structuredClone(item));
-  }
-
-  deleteItem(): void {
-    const selected = this.selectedItem();
-    if (!selected) {
-      return;
-    }
-
-    this.menuApiService.delete(selected.id).pipe(
-      this.handleRequestError('Could not delete this menu item.'),
-    ).subscribe(() => {
-      const next = this.menuItems().filter(item => item.id !== selected.id);
-      this.menuItems.set(next);
-      this.selectedItem.set(null);
-      this.isCreatingNew.set(false);
-      this.menuModel.set(this.createDraftItem());
-    });
+    // Store updates selectedItem and returns a cloned draft for the form.
+    const draft = this.store.selectItem(item);
+    this.menuModel.set(draft);
   }
 
   startCreateItem(): void {
-    const restaurantId = this.requireRestaurantId();
-    if (!restaurantId) {
-      return;
+    // Store switches to create mode and returns an empty draft item.
+    const draft = this.store.startCreateItem();
+
+    // Check Draft is not null, 
+    // because startCreateItem can return null if there is no restaurant.
+    if (draft) {
+      this.menuModel.set(draft);
     }
+  }
 
-    this.errorMessage.set('');
-    this.selectedItem.set(null);
-    this.isCreatingNew.set(true);
+  private submitMenuForm() {
+    return firstValueFrom(
+      // Ask the user to confirm before saving.
+      this.dialog.open(SaveDialog, EditMenu.DIALOG_CONFIG).afterClosed().pipe(
+        switchMap(confirmed => {
+          if (!confirmed) {
+            return of(null);
+          }
 
-    this.menuModel.set(this.createDraftItem({
-      restaurantId,
-      categoryId: this.resolveCategoryId(null),
-    }));
+          // Save the current form draft through the store.
+          return this.store.saveItem(this.menuModel()).pipe(
+            tap(saved => {
+              // Update the form with the saved item returned from the backend.
+              // This is useful for new items because the backend gives them an ID.
+              this.menuModel.set(saved);
+            }),
+
+            // The signal form expects null when submission succeeds.
+            map(() => null),
+          );
+        }),
+
+        catchError(() => {
+          return of({
+            kind: 'serverError' as const,
+            message: this.store.errorMessage(),
+          });
+        }),
+      ),
+    );
   }
 
   confirmDelete(): void {
-    this.openConfirmationDialog(DeleteDialog, () => this.deleteItem());
-  }
-
-  private createDraftItem(overrides: Partial<MenuItem> = {}): MenuItem {
-    return {
-      id: 0,
-      restaurantId: this.restaurantId ?? 0,
-      categoryId: null,
-      name: '',
-      description: '',
-      imageUrl: '',
-      price: 0,
-      currency: 'dkk',
-      inStock: true,
-      ...overrides,
-    };
-  }
-
-  private requireRestaurantId(): number | null {
-    if (!this.restaurantId) {
-      this.errorMessage.set('Restaurant context is missing. Please refresh and try again.');
-      return null;
-    }
-
-    return this.restaurantId;
-  }
-
-  private resolveCategoryId(currentCategoryId: number | null): number | null {
-    return currentCategoryId
-      ?? this.selectedItem()?.categoryId
-      ?? this.menuItems()[0]?.categoryId
-      ?? null;
-  }
-
-  private toPayload(item: MenuItem, restaurantId: number): UpdateMenuItemRequest {
-    return {
-      restaurantId,
-      categoryId: this.resolveCategoryId(item.categoryId),
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      imageUrl: item.imageUrl,
-      isAvailable: item.inStock,
-    };
-  }
-
-  private handleRequestError<T>(message: string): MonoTypeOperatorFunction<T> {
-    return catchError(() => {
-      this.errorMessage.set(message);
-      return EMPTY;
-    });
-  }
-
-  private openConfirmationDialog(dialogComponent: typeof SaveDialog | typeof DeleteDialog, onConfirm: () => void): void {
-    this.dialog.open(dialogComponent, EditMenu.DIALOG_CONFIG)
-      .afterClosed()
-      .subscribe((confirmed: boolean) => {
-        if (confirmed) {
-          onConfirm();
+    // Ask the user to confirm before deleting.
+    this.dialog.open(DeleteDialog, EditMenu.DIALOG_CONFIG).afterClosed().pipe(
+      switchMap(confirmed => {
+        if (!confirmed) {
+          return of(false);
         }
-      });
-  }
+        return this.store.deleteSelected();
+      }),
 
-  private applySavedItem(saved: MenuItemDto, isCreateMode: boolean): void {
-    const nextSaved = this.fromDto(saved);
-    const next = isCreateMode
-      ? [nextSaved, ...this.menuItems()]
-      : this.menuItems().map(item => (item.id === saved.id ? nextSaved : item));
-
-    this.menuItems.set(next);
-    this.isCreatingNew.set(false);
-
-    const nextSelected = next.find(item => item.id === saved.id) ?? null;
-    this.selectedItem.set(nextSelected);
-    if (nextSelected) {
-      this.menuModel.set(structuredClone(nextSelected));
-    }
-  }
-
-  // Utility method to convert MenuItemDto to MenuItem used in the component
-  private fromDto(item: MenuItemDto): MenuItem {
-    return {
-      id: item.id,
-      restaurantId: item.restaurantId,
-      categoryId: item.categoryId,
-      name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
-      price: item.price,
-      currency: 'dkk',
-      inStock: item.isAvailable,
-    };
+      tap(deleted => {
+        // If delete succeeded, reset the form to an empty draft.
+        if (deleted) {
+          this.menuModel.set(this.store.createDraftItem());
+        }
+      }),
+    ).subscribe();
   }
 }

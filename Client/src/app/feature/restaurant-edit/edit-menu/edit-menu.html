@@ -4,7 +4,9 @@
     <p>Add, edit or remove menu items from your restaurant</p>
   </div>
 
-  <button type="button" class="btn add-btn" (click)="startCreateItem()">+ Add New Item</button>
+  <button type="button" class="btn add-btn" (click)="startCreateItem()">
+    + Add New Item
+  </button>
 </header>
 
 <section class="menu-filters" aria-label="Menu filters">
@@ -15,15 +17,15 @@
 </section>
 
 <section class="menu-table card" aria-label="Menu items">
-  @if (isLoading()) {
+  @if (store.isLoading()) {
     <p>Loading menu items...</p>
   }
 
-  @if (errorMessage()) {
-    <p>{{ errorMessage() }}</p>
+  @if (store.errorMessage()) {
+    <p>{{ store.errorMessage() }}</p>
   }
 
-  @if (hasNoRestaurant()) {
+  @if (store.hasNoRestaurant()) {
     <p>No restaurant profile found for your account yet.</p>
   }
 
@@ -34,14 +36,14 @@
     <span>Action</span>
   </div>
 
-  @for (item of menuItems(); track item.id) {
-    <div class="table-row" [class.selected]="selectedItem()?.id === item.id">
+  @for (item of store.menuItems(); track item.id) {
+    <div class="table-row" [class.selected]="store.selectedItem()?.id === item.id">
       <div class="item-cell">
         <img [src]="item.imageUrl" [alt]="item.name" />
         <strong>{{ item.name }}</strong>
       </div>
 
-      <span>{{ item.price }}{{ item.currency }}</span>
+      <span>{{ item.price }}{{ currency }}</span>
 
       <span>
         <span class="status" [class.out]="!item.inStock">
@@ -50,27 +52,45 @@
       </span>
 
       <div class="actions">
-        <button type="button" class="btn" (click)="selectItem(item)">View</button>
+        <button type="button" class="btn" (click)="selectItem(item)">
+          View
+        </button>
       </div>
     </div>
   }
 </section>
 
-@if (selectedItem() || isCreatingNew()) {
+@if (store.selectedItem() || store.mode() === 'create') {
   <form class="item-details card" [formRoot]="menuForm">
     <header>
       <div>
-        <h2>{{ isCreatingNew() ? 'Add New Menu Item' : 'Edit ' + menuModel().name }}</h2>
-        <p>{{ isCreatingNew() ? 'Create a new menu item' : 'Update menu item details' }}</p>
+        <h2>
+          {{ store.mode() === 'create' ? 'Add New Menu Item' : 'Edit ' + menuModel().name }}
+        </h2>
+        <p>
+          {{ store.mode() === 'create' ? 'Create a new menu item' : 'Update menu item details' }}
+        </p>
       </div>
 
       <div class="detail-actions">
-        <button type="submit" class="btn save-btn" [disabled]="menuForm().invalid() || isSubmitting()">{{ isSubmitting() ? 'Saving...' : (isCreatingNew() ? 'Create Item' : 'Save Changes') }}</button>
-        @if (!isCreatingNew()) {
-          <button (click)="confirmDelete()" type="button" class="btn delete-btn">Delete menu item</button>
+        <button
+          type="submit"
+          class="btn save-btn"
+          [disabled]="menuForm().invalid() || store.isSubmitting()"
+        >
+          {{ store.isSubmitting() ? 'Saving...' : (store.mode() === 'create' ? 'Create Item' : 'Save Changes') }}
+        </button>
+
+        @if (store.mode() !== 'create') {
+          <button
+            type="button"
+            class="btn delete-btn"
+            (click)="confirmDelete()"
+          >
+            Delete menu item
+          </button>
         }
       </div>
-
     </header>
 
     <div class="edit-form">
@@ -89,10 +109,10 @@
         <textarea class="form-control" [formField]="menuForm.description"></textarea>
       </label>
 
-    <label class="checkbox-field">
-      <input type="checkbox" [formField]="menuForm.inStock" />
-      In Stock
-    </label>
+      <label class="checkbox-field">
+        <input type="checkbox" [formField]="menuForm.inStock" />
+        In Stock
+      </label>
     </div>
   </form>
 }
