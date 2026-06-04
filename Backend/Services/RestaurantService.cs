@@ -23,6 +23,13 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
         return restaurant?.ToDto();
     }
 
+    // Retrieves one restaurant by owner user ID and maps it to a DTO.
+    public async Task<RestaurantDto?> GetByUserIdAsync(int userId)
+    {
+        var restaurant = await _restaurantRepository.GetSingleByUserIdAsync(userId);
+        return restaurant?.ToDto();
+    }
+
     // Maps the DTO to a model, saves it, and returns the created restaurant as a DTO.
     public async Task<RestaurantDto> CreateAsync(CreateRestaurantDto dto)
     {

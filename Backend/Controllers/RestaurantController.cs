@@ -2,6 +2,8 @@ using Backend.DTOs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Backend.Controllers;
 
@@ -11,6 +13,14 @@ namespace Backend.Controllers;
 public class RestaurantsController(IRestaurantService restaurantService) : ControllerBase
 {
     private readonly IRestaurantService _restaurantService = restaurantService;
+
+    private int? GetCurrentUserId()
+    {
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        return int.TryParse(claimValue, out var userId) ? userId : null;
+    }
 
     // Returns every restaurant.
     [HttpGet]
@@ -25,6 +35,22 @@ public class RestaurantsController(IRestaurantService restaurantService) : Contr
     public async Task<IActionResult> GetById(int id)
     {
         var restaurant = await _restaurantService.GetByIdAsync(id);
+        if (restaurant is null)
+            return NotFound();
+
+        return Ok(restaurant);
+    }
+
+    // Returns the currently authenticated restaurant user's restaurant.
+    [HttpGet("me")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> GetMine()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+            return Unauthorized();
+
+        var restaurant = await _restaurantService.GetByUserIdAsync(userId.Value);
         if (restaurant is null)
             return NotFound();
 

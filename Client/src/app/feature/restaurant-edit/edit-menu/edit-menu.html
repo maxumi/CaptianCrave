@@ -4,7 +4,7 @@
     <p>Add, edit or remove menu items from your restaurant</p>
   </div>
 
-  <button type="button" class="btn add-btn">+ Add New Item</button>
+  <button type="button" class="btn add-btn" (click)="startCreateItem()">+ Add New Item</button>
 </header>
 
 <section class="menu-filters" aria-label="Menu filters">
@@ -15,6 +15,18 @@
 </section>
 
 <section class="menu-table card" aria-label="Menu items">
+  @if (isLoading()) {
+    <p>Loading menu items...</p>
+  }
+
+  @if (errorMessage()) {
+    <p>{{ errorMessage() }}</p>
+  }
+
+  @if (hasNoRestaurant()) {
+    <p>No restaurant profile found for your account yet.</p>
+  }
+
   <div class="table-head">
     <span>Item</span>
     <span>Price</span>
@@ -22,7 +34,7 @@
     <span>Action</span>
   </div>
 
-  @for (item of menuItems; track item.id) {
+  @for (item of menuItems(); track item.id) {
     <div class="table-row" [class.selected]="selectedItem()?.id === item.id">
       <div class="item-cell">
         <img [src]="item.imageUrl" [alt]="item.name" />
@@ -44,17 +56,19 @@
   }
 </section>
 
-@if (selectedItem()) {
-  <form class="item-details card" [formRoot]="menuForm" (submit)="saveItem()">
+@if (selectedItem() || isCreatingNew()) {
+  <form class="item-details card" [formRoot]="menuForm">
     <header>
       <div>
-        <h2>Edit {{ menuModel().name }}</h2>
-        <p>Update menu item details</p>
+        <h2>{{ isCreatingNew() ? 'Add New Menu Item' : 'Edit ' + menuModel().name }}</h2>
+        <p>{{ isCreatingNew() ? 'Create a new menu item' : 'Update menu item details' }}</p>
       </div>
 
       <div class="detail-actions">
-        <button (click)="openDialog('save')" type="submit" class="btn save-btn">Save Changes</button>
-        <button (click)="openDialog('delete')" class="btn delete-btn">Delete menu item</button>
+        <button type="submit" class="btn save-btn" [disabled]="menuForm().invalid() || isSubmitting()">{{ isSubmitting() ? 'Saving...' : (isCreatingNew() ? 'Create Item' : 'Save Changes') }}</button>
+        @if (!isCreatingNew()) {
+          <button (click)="confirmDelete()" type="button" class="btn delete-btn">Delete menu item</button>
+        }
       </div>
 
     </header>
@@ -68,6 +82,11 @@
       <label>
         Price
         <input class="form-control" type="number" [formField]="menuForm.price" />
+      </label>
+
+      <label>
+        Description
+        <textarea class="form-control" [formField]="menuForm.description"></textarea>
       </label>
 
     <label class="checkbox-field">

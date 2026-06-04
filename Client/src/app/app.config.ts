@@ -2,16 +2,18 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, isDevMode } from
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { TranslocoHttpLoader } from './transloco-loader';
 import { provideTransloco } from '@jsverse/transloco';
 import { providePreloadUserLang } from '../preload-user-lang';
+import { authInterceptor } from './core/auth/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(), provideHttpClient(), provideTransloco({
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideTransloco({
         config: { 
           availableLangs: ['en', 'da'],
           defaultLang: 'en',

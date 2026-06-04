@@ -28,4 +28,19 @@ public class MenuItemRepository(AppDbContext db) : IMenuItemRepository
         await _db.SaveChangesAsync();
         return menuItem;
     }
+
+    // Updates an existing menu item row and returns the updated entity.
+    public async Task<MenuItem> UpdateAsync(MenuItem menuItem)
+    {
+        _db.MenuItems.Update(menuItem);
+        await _db.SaveChangesAsync();
+        return menuItem;
+    }
+
+    // Deletes an existing menu item row.
+    public async Task DeleteAsync(MenuItem menuItem)
+    {
+        _db.MenuItems.Remove(menuItem);
+        await _db.SaveChangesAsync();
+    }
 }
