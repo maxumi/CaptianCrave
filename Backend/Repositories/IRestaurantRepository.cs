@@ -14,6 +14,9 @@ public interface IRestaurantRepository
     // Returns all restaurants owned by the specified user.
     Task<IEnumerable<Restaurant>> GetByUserIdAsync(int userId);
 
+    // Returns one restaurant owned by the specified user, or null if not found.
+    Task<Restaurant?> GetSingleByUserIdAsync(int userId);
+
     // Saves a new restaurant and returns it with the generated ID.
     Task<Restaurant> CreateAsync(Restaurant restaurant);
 }

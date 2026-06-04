@@ -22,8 +22,7 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
             .IsRequired();
 
         builder.Property(m => m.CategoryId)
-            .HasColumnName("category_id")
-            .IsRequired();
+            .HasColumnName("category_id");
 
         builder.Property(m => m.Name)
             .HasColumnName("name")
@@ -51,6 +50,7 @@ public class MenuItemConfiguration : IEntityTypeConfiguration<MenuItem>
         builder.HasOne(m => m.Category)
             .WithMany(c => c.MenuItems)
             .HasForeignKey(m => m.CategoryId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

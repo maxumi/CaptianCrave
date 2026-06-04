@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'register', component: Register, canActivate: [guestGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'cart', component: Cart, canActivate: [authGuard]  },
-  { path: "restaurant-edit", component: RestaurantEdit, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant'] } },
+  { path: 'restaurant-edit', component: RestaurantEdit, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant', 'Admin'] } },
   { path: 'restaurants', component: Restaurants, canActivate: [authGuard]  },
   { path: 'restaurantInfo', component: RestaurantInfo, canActivate: [authGuard]  },
   

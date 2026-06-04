@@ -85,5 +85,51 @@
     "restaurantInfo": {
       "menu": "Menuer",
       "addItem": "Tilføj vare"
+  },
+  "menuEdit": {
+    "title": "Administrer menu",
+    "subtitle": "Tilføj, rediger eller fjern menupunkter fra din restaurant",
+    "addNewItem": "+ Tilføj ny vare",
+    "searchLabel": "Søg i menuvarer",
+    "searchPlaceholder": "Søg menuvarer",
+    "loading": "Indlæser menuvarer...",
+    "noRestaurant": "Ingen restaurantprofil fundet for din konto endnu.",
+    "view": "Vis",
+    "createItem": "Opret vare",
+    "saveChanges": "Gem ændringer",
+    "deleteItem": "Slet menuvare",
+    "saving": "Gemmer...",
+    "status": {
+      "inStock": "På lager",
+      "outOfStock": "Udsolgt"
+    },
+    "table": {
+      "item": "Vare",
+      "price": "Pris",
+      "status": "Status",
+      "action": "Handling"
+    },
+    "fields": {
+      "name": "Navn",
+      "price": "Pris",
+      "description": "Beskrivelse",
+      "inStock": "På lager"
+    },
+    "form": {
+      "addTitle": "Tilføj ny menuvare",
+      "editTitle": "Rediger {{name}}",
+      "addSubtitle": "Opret en ny menuvare",
+      "editSubtitle": "Opdater menuvarens detaljer"
+    },
+    "aria": {
+      "filters": "Menufiltre",
+      "menuItems": "Menuvarer"
+    },
+    "error": {
+      "missingRestaurant": "Restaurantkontekst mangler. Opdater siden, og prøv igen.",
+      "loadFailed": "Kunne ikke indlæse menuvarer. Prøv igen.",
+      "saveFailed": "Kunne ikke gemme menuvaren.",
+      "deleteFailed": "Kunne ikke slette menuvaren."
+    }
   }
 }
