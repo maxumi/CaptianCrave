@@ -52,7 +52,11 @@
         <p>Update menu item details</p>
       </div>
 
-      <button type="submit" class="btn save-btn">Save Changes</button>
+      <div class="detail-actions">
+        <button (click)="openDialog('save')" type="submit" class="btn save-btn">Save Changes</button>
+        <button (click)="openDialog('delete')" class="btn delete-btn">Delete menu item</button>
+      </div>
+
     </header>
 
     <div class="edit-form">
@@ -66,15 +70,10 @@
         <input class="form-control" type="number" [formField]="menuForm.price" />
       </label>
 
-      <label>
-        Currency
-        <input class="form-control" type="text" [formField]="menuForm.currency" />
-      </label>
-
-      <label class="checkbox-field">
-        <input type="checkbox" [formField]="menuForm.inStock" />
-        In Stock
-      </label>
+    <label class="checkbox-field">
+      <input type="checkbox" [formField]="menuForm.inStock" />
+      In Stock
+    </label>
     </div>
   </form>
 }

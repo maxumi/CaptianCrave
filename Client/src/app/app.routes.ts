@@ -9,6 +9,7 @@ import { authGuard, guestGuard } from './core/auth/auth-guard';
 import { Profile } from './feature/profile/profile';
 import { Cart } from './feature/cart/cart';
 import { RestaurantEdit } from './feature/restaurant-edit/restaurant-edit';
+import { NotFound } from './core/not-found/not-found';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -19,7 +20,7 @@ export const routes: Routes = [
   { path: 'cart', component: Cart, canActivate: [authGuard]  },
   { path: "restaurant-edit", component: RestaurantEdit},
   { path: 'restaurants', component: Restaurants, canActivate: [authGuard]  },
-  { path: 'restaurantInfo', component: RestaurantInfo, canActivate: [authGuard]  }
-
+  { path: 'restaurantInfo', component: RestaurantInfo, canActivate: [authGuard]  },
   
+   { path: '**', component: NotFound }
 ];

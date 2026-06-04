@@ -1,5 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialog } from './delete-dialog/delete-dialog';
+import { SaveDialog } from './save-dialog/save-dialog';
 
 interface MenuItem {
   id: number;
@@ -19,6 +22,7 @@ interface MenuItem {
 })
 export class EditMenu {
   selectedItem = signal<MenuItem | null>(null);
+  readonly dialog = inject(MatDialog);
 
   menuModel = signal<MenuItem>({
     id: 0,
@@ -74,6 +78,22 @@ export class EditMenu {
     if (index !== -1) {
       this.menuItems[index] = structuredClone(updatedItem);
       this.selectedItem.set(this.menuItems[index]);
+    }
+  }
+  openDialog(dialog: string): void {
+    if (dialog === 'delete') {
+      this.dialog.open(DeleteDialog, {
+        width: '250px',
+        enterAnimationDuration: '200ms',
+        exitAnimationDuration: '150ms',
+      });
+    }
+    else if (dialog === "save"){
+      this.dialog.open(SaveDialog, {
+        width: '250px',
+        enterAnimationDuration: '200ms',
+        exitAnimationDuration: '150ms',
+      });
     }
   }
 }

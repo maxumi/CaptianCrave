@@ -1,13 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
-import { AuthState } from '../../shared/models/user';
+import { AuthState, Role } from '../../shared/models/user';
 import { environment } from '../../../environments/environment';
-
-export enum Role {
-  Customer = 'customer',
-  Restaurant = 'restaurant',
-}
 
 interface RegisterRequest {
   name: string;
@@ -110,5 +105,18 @@ export class AuthService {
     }
 
     this.user.set(authState);
+  }
+  isLoggedIn(): boolean {
+    return !!this.user()?.token;
+  }
+
+  hasRole(roles: Role[]): boolean {
+    const currentRole = this.user()?.role as Role | undefined;
+
+    if (!currentRole) {
+      return false;
+    }
+
+    return roles.includes(currentRole);
   }
 }
