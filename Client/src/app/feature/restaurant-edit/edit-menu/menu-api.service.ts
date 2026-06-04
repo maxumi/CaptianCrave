@@ -2,40 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { MenuItem, RestaurantDto, UpdateMenuItemRequest } from './edit-menu.models';
 
-export interface RestaurantDto {
-  id: number;
-  userId: number;
-  name: string;
-  description: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  imageUrl: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface MenuItemDto {
-  id: number;
-  restaurantId: number;
-  categoryId: number | null;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  isAvailable: boolean;
-}
-
-export interface UpdateMenuItemRequest {
-  restaurantId: number;
-  categoryId: number | null;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  isAvailable: boolean;
-}
 
 @Injectable({ providedIn: 'root' })
 export class MenuApiService {
@@ -47,16 +15,16 @@ export class MenuApiService {
     return this.http.get<RestaurantDto>(`${this.restaurantsUrl}/me`);
   }
 
-  getMenuItemsByRestaurant(restaurantId: number): Observable<MenuItemDto[]> {
-    return this.http.get<MenuItemDto[]>(`${this.menuItemsUrl}/restaurant/${restaurantId}`);
+  getMenuItemsByRestaurant(restaurantId: number): Observable<MenuItem[]> {
+    return this.http.get<MenuItem[]>(`${this.menuItemsUrl}/restaurant/${restaurantId}`);
   }
 
-  create(payload: UpdateMenuItemRequest): Observable<MenuItemDto> {
-    return this.http.post<MenuItemDto>(this.menuItemsUrl, payload);
+  create(payload: UpdateMenuItemRequest): Observable<MenuItem> {
+    return this.http.post<MenuItem>(this.menuItemsUrl, payload);
   }
 
-  update(itemId: number, payload: UpdateMenuItemRequest): Observable<MenuItemDto> {
-    return this.http.put<MenuItemDto>(`${this.menuItemsUrl}/${itemId}`, payload);
+  update(itemId: number, payload: UpdateMenuItemRequest): Observable<MenuItem> {
+    return this.http.put<MenuItem>(`${this.menuItemsUrl}/${itemId}`, payload);
   }
 
   delete(itemId: number): Observable<void> {

@@ -1,16 +1,16 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs';
-import { MenuItem, MenuEditMode } from './edit-menu.models';
+import { TranslocoService } from '@jsverse/transloco';
+import { MenuItem, MenuEditMode, UpdateMenuItemRequest } from './edit-menu.models';
 import {
-  MenuApiService,
-  MenuItemDto,
-  UpdateMenuItemRequest,
+  MenuApiService
 } from './menu-api.service';
 
 @Injectable()
 export class MenuEditStore {
   private readonly menuApiService = inject(MenuApiService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly mode = signal<MenuEditMode>('edit');
   readonly isSubmitting = signal(false);
@@ -20,20 +20,17 @@ export class MenuEditStore {
 
   readonly menuItems = signal<MenuItem[]>([]);
   readonly selectedItem = signal<MenuItem | null>(null);
-
   readonly restaurantId = signal<number | null>(null);
 
   load(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
-
-    // First get the restaurant of the current user
-    // then load the menu items for that restaurant in switchmap and subscribe.
+    this.hasNoRestaurant.set(false);
+    this.clearRestaurantState();
 
     this.menuApiService.getMyRestaurant().pipe(
       switchMap(restaurant => {
         this.restaurantId.set(restaurant.id);
-        this.hasNoRestaurant.set(false);
 
         return this.menuApiService.getMenuItemsByRestaurant(restaurant.id);
       }),
@@ -41,34 +38,47 @@ export class MenuEditStore {
       catchError((error: { status?: number }) => {
         if (error.status === 404) {
           this.hasNoRestaurant.set(true);
-          this.menuItems.set([]);
+          this.clearRestaurantState();
         } else {
-          this.errorMessage.set('Failed to load menu items. Please try again.');
+          this.errorMessage.set(this.t('error.loadFailed'));
         }
-
+        // empty observable.
         return EMPTY;
       }),
 
       finalize(() => {
         this.isLoading.set(false);
       }),
-    ).subscribe((items: MenuItemDto[]) => {
-      this.menuItems.set(items.map(item => this.fromDto(item)));
+    ).subscribe(items => {
+      this.menuItems.set(items);
     });
   }
 
-  selectItem(item: MenuItem): MenuItem {
-    this.selectedItem.set(item);
+selectItem(item: MenuItem): MenuItem | null {
+  const selected = this.selectedItem();
+
+  // if the same item is selected again, deselect it and switch to edit mode.
+  if (selected?.id === item.id) {
+    this.selectedItem.set(null);
     this.mode.set('edit');
     this.errorMessage.set('');
 
-    return structuredClone(item);
+    return null;
   }
 
+  this.selectedItem.set(item);
+  this.mode.set('edit');
+  this.errorMessage.set('');
+
+  return structuredClone(item);
+}
+
+  // A menu item can only be created when a restaurant has been loaded.
   startCreateItem(): MenuItem | null {
     const restaurantId = this.restaurantId();
 
     if (restaurantId == null) {
+      this.errorMessage.set(this.t('error.missingRestaurant'));
       return null;
     }
 
@@ -86,24 +96,29 @@ export class MenuEditStore {
     const restaurantId = this.restaurantId();
 
     if (restaurantId == null) {
-      return throwError(() => new Error(this.errorMessage()));
+      const message = this.t('error.missingRestaurant');
+      this.errorMessage.set(message);
+      return throwError(() => new Error(message));
     }
 
     this.errorMessage.set('');
     this.isSubmitting.set(true);
 
-    const isCreateMode = this.mode() === 'create' || item.id === 0;
+    const isNewItem = this.mode() === 'create' || item.id === 0;
+    // Convert the form item to the payload for API.
     const payload = this.toPayload(item, restaurantId);
 
-    const request = isCreateMode
+    // Create or Update request
+    const request = isNewItem
       ? this.menuApiService.create(payload)
       : this.menuApiService.update(item.id, payload);
 
+
     return request.pipe(
-      map(saved => this.applySavedItem(saved, isCreateMode)),
+      map(saved => this.updateStateAfterSave(saved, isNewItem)),
 
       catchError(error => {
-        this.errorMessage.set('Could not save this menu item.');
+        this.errorMessage.set(this.t('error.saveFailed'));
         return throwError(() => error);
       }),
 
@@ -124,10 +139,7 @@ export class MenuEditStore {
 
     return this.menuApiService.delete(selected.id).pipe(
       map(() => {
-        this.menuItems.set(
-          this.menuItems().filter(item => item.id !== selected.id)
-        );
-
+        this.removeMenuItem(selected.id);
         this.selectedItem.set(null);
         this.mode.set('edit');
 
@@ -135,10 +147,14 @@ export class MenuEditStore {
       }),
 
       catchError(() => {
-        this.errorMessage.set('Could not delete this menu item.');
+        this.errorMessage.set(this.t('error.deleteFailed'));
         return of(false);
       }),
     );
+  }
+
+  private t(key: string): string {
+    return this.translocoService.translate(`menuEdit.${key}`);
   }
 
   createDraftItem(overrides: Partial<MenuItem> = {}): MenuItem {
@@ -150,9 +166,49 @@ export class MenuEditStore {
       description: '',
       imageUrl: '',
       price: 0,
-      inStock: true,
+      isAvailable: true,
       ...overrides,
     };
+  }
+
+  private updateStateAfterSave(
+    savedItem: MenuItem,
+    isNewItem: boolean
+  ): MenuItem {
+    if (isNewItem) {
+      this.addMenuItem(savedItem);
+    } else {
+      this.updateMenuItem(savedItem);
+    }
+
+    this.selectedItem.set(savedItem);
+    this.mode.set('edit');
+
+    return structuredClone(savedItem);
+  }
+
+  private addMenuItem(item: MenuItem): void {
+    this.menuItems.set([item, ...this.menuItems()]);
+  }
+
+  private updateMenuItem(item: MenuItem): void {
+    this.menuItems.set(
+      this.menuItems().map(existingItem =>
+        existingItem.id === item.id ? item : existingItem
+      )
+    );
+  }
+
+  private removeMenuItem(itemId: number): void {
+    this.menuItems.set(
+      this.menuItems().filter(item => item.id !== itemId)
+    );
+  }
+
+  private clearRestaurantState(): void {
+    this.menuItems.set([]);
+    this.selectedItem.set(null);
+    this.restaurantId.set(null);
   }
 
   private toPayload(
@@ -166,39 +222,7 @@ export class MenuEditStore {
       description: item.description,
       price: item.price,
       imageUrl: item.imageUrl,
-      isAvailable: item.inStock,
-    };
-  }
-
-  private applySavedItem(
-    saved: MenuItemDto,
-    isCreateMode: boolean
-  ): MenuItem {
-    const nextSaved = this.fromDto(saved);
-
-    const next = isCreateMode
-      ? [nextSaved, ...this.menuItems()]
-      : this.menuItems().map(item =>
-          item.id === saved.id ? nextSaved : item
-        );
-
-    this.menuItems.set(next);
-    this.selectedItem.set(nextSaved);
-    this.mode.set('edit');
-
-    return structuredClone(nextSaved);
-  }
-
-  private fromDto(item: MenuItemDto): MenuItem {
-    return {
-      id: item.id,
-      restaurantId: item.restaurantId,
-      categoryId: item.categoryId,
-      name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
-      price: item.price,
-      inStock: item.isAvailable,
+      isAvailable: item.isAvailable,
     };
   }
 }

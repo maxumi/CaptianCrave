@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslocoModule } from '@jsverse/transloco';
 import {
   catchError,
   firstValueFrom,
@@ -17,7 +18,7 @@ import { MenuItem } from './edit-menu.models';
 
 @Component({
   selector: 'app-edit-menu',
-  imports: [FormField, FormRoot],
+  imports: [TranslocoModule, FormField, FormRoot],
   templateUrl: './edit-menu.html',
   styleUrl: './edit-menu.css',
 
@@ -61,9 +62,14 @@ export class EditMenu implements OnInit {
   }
 
   selectItem(item: MenuItem): void {
-    // Store updates selectedItem and returns a cloned draft for the form.
     const draft = this.store.selectItem(item);
-    this.menuModel.set(draft);
+
+    if (draft) {
+      this.menuModel.set(draft);
+      return;
+    }
+
+    this.menuModel.set(this.store.createDraftItem());
   }
 
   startCreateItem(): void {
@@ -78,6 +84,7 @@ export class EditMenu implements OnInit {
   }
 
   private submitMenuForm() {
+    // submit seems to require async so use firstValueFrom to convert the observable to a promise.
     return firstValueFrom(
       // Ask the user to confirm before saving.
       this.dialog.open(SaveDialog, EditMenu.DIALOG_CONFIG).afterClosed().pipe(
