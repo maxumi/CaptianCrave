@@ -66,6 +66,7 @@ export class LocationService {
       .pipe(map((results) => this.toLocationResult(results[0])));
   }
 
+  // Test function to see if we can get nearby restaurants from OpenStreetMap based on lat/lng.
   getNearbyRestaurants(
     lat: number,
     lng: number,

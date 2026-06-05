@@ -102,7 +102,13 @@ registerForm = form(
             }),
           );
 
-          await this.router.navigate(['/']);
+          const role = this.registerForm.role().value();
+
+          if (role === Role.Restaurant) {
+            await this.router.navigate(['/restaurant-create']);
+          } else {
+            await this.router.navigate(['/']);
+          }
 
           return null;
         } catch (error) {

@@ -6,10 +6,12 @@ import { MenuItem, MenuEditMode, UpdateMenuItemRequest } from './edit-menu.model
 import {
   MenuApiService
 } from './menu-api.service';
+import { RestaurantApiService } from '../../../shared/restaurant-api.service';
 
 @Injectable()
 export class MenuEditStore {
   private readonly menuApiService = inject(MenuApiService);
+  private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly translocoService = inject(TranslocoService);
 
   readonly mode = signal<MenuEditMode>('edit');
@@ -28,7 +30,7 @@ export class MenuEditStore {
     this.hasNoRestaurant.set(false);
     this.clearRestaurantState();
 
-    this.menuApiService.getMyRestaurant().pipe(
+    this.restaurantApiService.getMyRestaurant().pipe(
       switchMap(restaurant => {
         this.restaurantId.set(restaurant.id);
 
@@ -165,7 +167,7 @@ selectItem(item: MenuItem): MenuItem | null {
       name: '',
       description: '',
       imageUrl: '',
-      price: 0,
+      price: 1,
       isAvailable: true,
       ...overrides,
     };
