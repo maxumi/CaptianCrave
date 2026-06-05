@@ -10,4 +10,10 @@ public interface IMenuItemService
 
     // Validates, creates, and returns the new menu item as a DTO.
     Task<MenuItemDto> CreateAsync(CreateMenuItemDto dto);
+
+    // Updates a menu item if found and authorized, then returns it as a DTO.
+    Task<MenuItemDto?> UpdateAsync(int id, CreateMenuItemDto dto, int userId, bool isAdmin);
+
+    // Deletes a menu item if found and authorized.
+    Task<bool> DeleteAsync(int id, int userId, bool isAdmin);
 }

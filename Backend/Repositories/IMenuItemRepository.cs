@@ -16,4 +16,10 @@ public interface IMenuItemRepository
 
     // Saves a new menu item and returns it with the generated ID.
     Task<MenuItem> CreateAsync(MenuItem menuItem);
+
+    // Updates an existing menu item and returns the updated entity.
+    Task<MenuItem> UpdateAsync(MenuItem menuItem);
+
+    // Deletes an existing menu item.
+    Task DeleteAsync(MenuItem menuItem);
 }

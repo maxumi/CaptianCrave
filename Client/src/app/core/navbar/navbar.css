@@ -152,8 +152,21 @@
   color: inherit;
 }
 
+.cart-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
 .profile-btn mat-icon {
   font-size: 24px;
   width: 24px;
   height: 24px;
+}
+
+.cart-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }

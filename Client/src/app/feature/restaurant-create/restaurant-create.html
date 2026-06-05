@@ -1,0 +1,79 @@
+<div class="restaurant-create-card card" *transloco="let t">
+  <h2>Create restaurant</h2>
+
+  <form [formRoot]="restaurantForm">
+    <label for="restaurantName">Restaurant name</label>
+    <input
+      id="restaurantName"
+      class="form-control"
+      type="text"
+      [formField]="restaurantForm.restaurantName"
+      placeholder="Enter restaurant name"
+    />
+
+    @if (restaurantForm.restaurantName().touched() && restaurantForm.restaurantName().invalid()) {
+      @for (error of restaurantForm.restaurantName().errors(); track error.kind) {
+        <p class="error">{{ error.message }}</p>
+      }
+    }
+
+    <label for="description">Description</label>
+    <textarea
+      id="description"
+      class="form-control"
+      [formField]="restaurantForm.description"
+      placeholder="Enter restaurant description"
+    ></textarea>
+
+    @if (restaurantForm.description().touched() && restaurantForm.description().invalid()) {
+      @for (error of restaurantForm.description().errors(); track error.kind) {
+        <p class="error">{{ error.message }}</p>
+      }
+    }
+
+    <label for="address">Address</label>
+
+    <div class="location-row">
+      <input
+        id="address"
+        class="form-control"
+        type="text"
+        [formField]="restaurantForm.address"
+        placeholder="Enter restaurant address"
+      />
+
+      <button
+        class="btn location-button"
+        type="button"
+        (click)="setLocationFromAddress()"
+      >
+        Set location
+      </button>
+    </div>
+
+    @if (restaurantForm.address().touched() && restaurantForm.address().invalid()) {
+      @for (error of restaurantForm.address().errors(); track error.kind) {
+        <p class="error">{{ error.message }}</p>
+      }
+    }
+
+    <div id="restaurant-create-map"></div>
+
+    <div class="location-info">
+      <p><strong>Latitude:</strong> {{ restaurantModel().latitude }}</p>
+      <p><strong>Longitude:</strong> {{ restaurantModel().longitude }}</p>
+    </div>
+
+    @if (submitError()) {
+      <p class="error">{{ submitError() }}</p>
+    }
+
+    <button
+      class="form-button"
+      type="submit"
+      [disabled]="restaurantForm().invalid() || isSubmitting()"
+    >
+      {{ isSubmitting() ? 'Creating...' : 'Create restaurant' }}
+    </button>
+  </form>
+</div>

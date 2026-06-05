@@ -7,8 +7,7 @@ public class CreateMenuItemDto
     [Required]
     public int RestaurantId { get; set; }
 
-    [Required]
-    public int CategoryId { get; set; }
+    public int? CategoryId { get; set; }
 
     [Required]
     [MaxLength(100)]

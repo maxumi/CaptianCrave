@@ -16,6 +16,11 @@
 
 <div class="auth-buttons">
   @if (authService.user()) {
+    <button class="cart-btn" type="button" routerLink="/cart" aria-label="Cart">
+      <mat-icon>shopping_cart</mat-icon>
+      <span>Cart</span>
+    </button>
+
     <button class="profile-btn" type="button" routerLink="/profile">
       <mat-icon>account_circle</mat-icon>
       <span>{{ authService.user()?.name }}</span>

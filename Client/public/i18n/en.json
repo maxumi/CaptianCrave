@@ -85,6 +85,51 @@
     "restaurantInfo": {
     "menu": "Menu",
     "addItem": "Add item"
+    },
+    "menuEdit": {
+      "title": "Manage Menu",
+      "subtitle": "Add, edit or remove menu items from your restaurant",
+      "addNewItem": "+ Add New Item",
+      "searchLabel": "Search menu items",
+      "searchPlaceholder": "Search Menu Items",
+      "loading": "Loading menu items...",
+      "noRestaurant": "No restaurant profile found for your account yet.",
+      "view": "View",
+      "createItem": "Create Item",
+      "saveChanges": "Save Changes",
+      "deleteItem": "Delete menu item",
+      "saving": "Saving...",
+      "status": {
+        "inStock": "In Stock",
+        "outOfStock": "Out of Stock"
+      },
+      "table": {
+        "item": "Item",
+        "price": "Price",
+        "status": "Status",
+        "action": "Action"
+      },
+      "fields": {
+        "name": "Name",
+        "price": "Price",
+        "description": "Description",
+        "inStock": "In Stock"
+      },
+      "form": {
+        "addTitle": "Add New Menu Item",
+        "editTitle": "Edit {{name}}",
+        "addSubtitle": "Create a new menu item",
+        "editSubtitle": "Update menu item details"
+      },
+      "aria": {
+        "filters": "Menu filters",
+        "menuItems": "Menu items"
+      },
+      "error": {
+        "missingRestaurant": "Restaurant context is missing. Please refresh and try again.",
+        "loadFailed": "Failed to load menu items. Please try again.",
+        "saveFailed": "Could not save this menu item.",
+        "deleteFailed": "Could not delete this menu item."
+      }
   }
-  
 }

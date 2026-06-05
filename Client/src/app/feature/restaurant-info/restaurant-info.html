@@ -5,49 +5,48 @@
 
   <h2>{{ t('restaurantInfo.menu') }}</h2>
 
-  <div class="menu-grid">
-    <div class="menu-card">
-      <div>
-        <h3>Palace Original Menu</h3>
-        <p class="price">DKK 159.00</p>
-        <p class="description">Beef, fries, and a drink included.</p>
-      </div>
+  @if (isLoading()) {
+    <p class="menu-state">Loading menu...</p>
+  }
 
-      <img src="burger-king.png" alt="Palace Original Menu" />
-      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
+  @if (loadError()) {
+    <p class="menu-state menu-state-error">{{ loadError() }}</p>
+  }
+
+  @if (!isLoading() && !loadError()) {
+    @if (!canAddToCart()) {
+      <p class="menu-state menu-state-error">Only customer accounts can add items to cart.</p>
+    }
+
+    @if (addMessage()) {
+      <p class="menu-state menu-state-success">{{ addMessage() }}</p>
+    }
+
+    <div class="menu-grid">
+      @for (item of menuItems(); track item.id) {
+        <div class="menu-card card">
+          <div>
+            <h3>{{ item.name }}</h3>
+            <p class="price">kr. {{ item.price }}</p>
+            <p class="description">{{ item.description }}</p>
+            <button
+              class="btn add-btn"
+              type="button"
+              [disabled]="!canAddToCart()"
+              [attr.aria-label]="t('restaurantInfo.addItem')"
+              (click)="addToCart(item)"
+            >
+              {{ t('restaurantInfo.addItem') }}
+            </button>
+          </div>
+
+          <img [src]="item.imageUrl || 'burger-king.png'" [alt]="item.name" />
+        </div>
+      }
     </div>
+  }
 
-    <div class="menu-card">
-      <div>
-        <h3>Palace Burger Menu</h3>
-        <p class="price">DKK 155.00</p>
-        <p class="description">Classic burger menu with fries.</p>
-      </div>
-
-      <img src="burger-king.png" alt="Palace Burger Menu" />
-      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
-    </div>
-
-    <div class="menu-card">
-      <div>
-        <h3>Palace Cheese Menu</h3>
-        <p class="price">DKK 159.00</p>
-        <p class="description">Cheeseburger, fries, and drink.</p>
-      </div>
-
-      <img src="burger-king.png" alt="Palace Cheese Menu" />
-      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
-    </div>
-
-    <div class="menu-card">
-      <div>
-        <h3>Palace Texas Menu</h3>
-        <p class="price">DKK 159.00</p>
-        <p class="description">Burger with smoky Texas flavor.</p>
-      </div>
-
-      <img src="burger-king.png" alt="Palace Texas Menu" />
-      <button type="button" [attr.aria-label]="t('restaurantInfo.addItem')">+</button>
-    </div>
-  </div>
+  @if (!isLoading() && !loadError() && !menuItems().length) {
+    <p class="menu-state">No menu items found.</p>
+  }
 </div>

@@ -10,6 +10,8 @@ import { Profile } from './feature/profile/profile';
 import { Cart } from './feature/cart/cart';
 import { RestaurantEdit } from './feature/restaurant-edit/restaurant-edit';
 import { NotFound } from './core/not-found/not-found';
+import { roleGuard } from './core/auth/role-guard';
+import { RestaurantCreate } from './feature/restaurant-create/restaurant-create';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -18,7 +20,8 @@ export const routes: Routes = [
   { path: 'register', component: Register, canActivate: [guestGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'cart', component: Cart, canActivate: [authGuard]  },
-  { path: "restaurant-edit", component: RestaurantEdit},
+  { path: 'restaurant-create', component: RestaurantCreate, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant'] } },
+  { path: 'restaurant-edit', component: RestaurantEdit, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant', 'Admin'] } },
   { path: 'restaurants', component: Restaurants, canActivate: [authGuard]  },
   { path: 'restaurantInfo', component: RestaurantInfo, canActivate: [authGuard]  },
   
