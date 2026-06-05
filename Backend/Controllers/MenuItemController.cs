@@ -12,14 +12,6 @@ public class MenuItemsController(IMenuItemService menuItemService) : ControllerB
 {
     private readonly IMenuItemService _menuItemService = menuItemService;
 
-    // Returns all menu items belonging to the specified restaurant.
-    [HttpGet("restaurant/{restaurantId}")]
-    public async Task<IActionResult> GetByRestaurant(int restaurantId)
-    {
-        var items = await _menuItemService.GetByRestaurantIdAsync(restaurantId);
-        return Ok(items);
-    }
-
     // Creates a new menu item and returns it with a 201 status.
     [HttpPost]
     [Authorize(Roles = "Restaurant,Admin")]

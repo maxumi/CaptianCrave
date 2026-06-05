@@ -8,9 +8,10 @@ namespace Backend.Controllers;
 // Handles HTTP requests for restaurant resources.
 [ApiController]
 [Route("api/[controller]")]
-public class RestaurantsController(IRestaurantService restaurantService) : ControllerBase
+public class RestaurantsController(IRestaurantService restaurantService, IMenuItemService menuItemService) : ControllerBase
 {
     private readonly IRestaurantService _restaurantService = restaurantService;
+    private readonly IMenuItemService _menuItemService = menuItemService;
 
     // Returns every restaurant.
     [HttpGet]
@@ -29,6 +30,14 @@ public class RestaurantsController(IRestaurantService restaurantService) : Contr
             return NotFound();
 
         return Ok(restaurant);
+    }
+
+    // Returns all menu items for the specified restaurant.
+    [HttpGet("{id}/menu-items")]
+    public async Task<IActionResult> GetMenuItems(int id)
+    {
+        var items = await _menuItemService.GetByRestaurantIdAsync(id);
+        return Ok(items);
     }
 
     // Creates a new restaurant and returns it with a 201 status.
