@@ -16,6 +16,15 @@ export interface CreateRestaurantRequest {
 
 export interface RestaurantDto {
   id: number;
+  userId: number;
+  name: string;
+  description: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  imageUrl: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 @Injectable({
@@ -27,6 +36,10 @@ export class RestaurantApiService {
 
   createRestaurant(payload: CreateRestaurantRequest): Observable<RestaurantDto> {
     return this.http.post<RestaurantDto>(this.restaurantsUrl, payload);
+  }
+
+  getRestaurants(): Observable<RestaurantDto[]> {
+    return this.http.get<RestaurantDto[]>(this.restaurantsUrl);
   }
 
   getMyRestaurant(): Observable<RestaurantDto> {

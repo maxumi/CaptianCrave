@@ -3,14 +3,12 @@ import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { MenuItem, MenuEditMode, UpdateMenuItemRequest } from './edit-menu.models';
-import {
-  MenuApiService
-} from './menu-api.service';
+import { MenuItemApiService } from '../../../shared/menu-item-api.service';
 import { RestaurantApiService } from '../../../shared/restaurant-api.service';
 
 @Injectable()
 export class MenuEditStore {
-  private readonly menuApiService = inject(MenuApiService);
+  private readonly menuApiService = inject(MenuItemApiService);
   private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly translocoService = inject(TranslocoService);
 

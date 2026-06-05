@@ -1,27 +1,58 @@
 <div class="page">
-  <section class="cart-card">
+  <section class="cart-card card">
     <h1>Cart</h1>
 
-    <div class="cart-items">
-      <div class="cart-item">
-          <div class="item-details">
-            <h2>Product Name</h2>
-            <p>19dkk</p>
+    @if (cartItems().length) {
+      <div class="cart-items">
+        @for (item of cartItems(); track item.menuItemId) {
+          <div class="cart-item card">
+            <img [src]="item.imageUrl || 'burger-king.png'" [alt]="item.name" />
 
-            <label>
-              Amount
-              <input type="number" min="1" value="1" class="amount-input">
-            </label>
-            <button class="remove-btn">Remove</button>
+            <div class="item-details">
+              <h2>{{ item.name }}</h2>
+              <p>DKK {{ item.price }}</p>
 
+              <label>
+                Amount
+                <input
+                  type="number"
+                  min="1"
+                  [value]="item.quantity"
+                  class="amount-input"
+                  (input)="onQuantityInput(item, $event)"
+                />
+              </label>
+              <button class="remove-btn" (click)="removeItem(item)">Remove</button>
+            </div>
           </div>
+        }
       </div>
-      <!-- More cart items can be added here -->
-    </div>
-    <!--
-    <div class="cart-empty">
-      <p>Your cart is empty.</p>
-    </div>
-    -->
+
+      <div class="cart-summary">
+        <p>Total: DKK {{ total() }}</p>
+        <div class="cart-actions">
+          <button class="btn" type="button" (click)="clearCart()">Clear cart</button>
+          <button class="btn" type="button" [disabled]="isSubmittingOrder() || !canCheckout()" (click)="checkout()">
+            {{ isSubmittingOrder() ? 'Placing order...' : 'Checkout' }}
+          </button>
+        </div>
+      </div>
+
+      @if (!canCheckout()) {
+        <p class="checkout-state checkout-state-error">Only customer accounts can place orders.</p>
+      }
+
+      @if (checkoutError()) {
+        <p class="checkout-state checkout-state-error">{{ checkoutError() }}</p>
+      }
+
+      @if (checkoutSuccess()) {
+        <p class="checkout-state checkout-state-success">{{ checkoutSuccess() }}</p>
+      }
+    } @else {
+      <div class="cart-empty">
+        <p>Your cart is empty.</p>
+      </div>
+    }
   </section>
 </div>
