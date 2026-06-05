@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { form, FormField, FormRoot } from '@angular/forms/signals';
+import { form, FormField, FormRoot, min } from '@angular/forms/signals';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslocoModule } from '@jsverse/transloco';
 import {
@@ -47,15 +47,19 @@ export class EditMenu implements OnInit {
 
   readonly currency = 'kr.';
 
-  readonly menuForm = form(
-    this.menuModel,
-    () => {},
-    {
-      submission: {
-        action: () => this.submitMenuForm(),
-      },
+readonly menuForm = form(
+  this.menuModel,
+  (path) => {
+    min(path.price, 1, {
+      message: 'Price must be at least 0',
+    });
+  },
+  {
+    submission: {
+      action: () => this.submitMenuForm(),
     },
-  );
+  }
+);
 
   ngOnInit(): void {
     this.store.load();
