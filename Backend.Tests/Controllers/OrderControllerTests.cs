@@ -1,5 +1,6 @@
-using Backend.Controllers;
+﻿using Backend.Controllers;
 using Backend.DTOs;
+using Backend.Models.Enums;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -23,8 +24,12 @@ public class OrderControllerTests
         UserEmail = "alice@example.com",
         RestaurantId = 5,
         RestaurantName = "Burger Palace",
+        Status = OrderStatus.Pending,
+        DeliveryType = DeliveryType.Delivery,
+        DeliveryAddress = "123 Main St",
         TotalPrice = 23.97m,
         CreatedAt = new DateTime(2026, 6, 1),
+        UpdatedAt = new DateTime(2026, 6, 1),
         Items =
         [
             new OrderItemDto { Id = 1, MenuItemId = 3, MenuItemName = "Burger", Quantity = 2, Price = 9.99m },
@@ -36,6 +41,8 @@ public class OrderControllerTests
     {
         UserId = 10,
         RestaurantId = 5,
+        DeliveryType = DeliveryType.Delivery,
+        DeliveryAddress = "123 Main St",
         Items =
         [
             new CreateOrderItemDto { MenuItemId = 3, Quantity = 2 },
@@ -66,6 +73,18 @@ public class OrderControllerTests
         var result = await controller.GetById(1) as OkObjectResult;
 
         Assert.Equal(dto, result?.Value);
+    }
+
+    [Fact]
+    public async Task GetById_ExistingId_ReturnsCorrectStatus()
+    {
+        var (controller, mockService) = CreateController();
+        mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(MakeOrderDto());
+
+        var result = await controller.GetById(1) as OkObjectResult;
+        var order = result?.Value as OrderDto;
+
+        Assert.Equal(OrderStatus.Pending, order?.Status);
     }
 
     [Fact]
@@ -168,4 +187,59 @@ public class OrderControllerTests
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
+    // UpdateStatus
+
+    [Fact]
+    public async Task UpdateStatus_ExistingOrder_ReturnsNoContent()
+    {
+        var (controller, mockService) = CreateController();
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+
+        var result = await controller.UpdateStatus(1, dto);
+
+        Assert.IsType<NoContentResult>(result);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_NonExistingOrder_ReturnsNotFound()
+    {
+        var (controller, mockService) = CreateController();
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
+        mockService.Setup(s => s.UpdateStatusAsync(99, dto)).ReturnsAsync(false);
+
+        var result = await controller.UpdateStatus(99, dto);
+
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task UpdateStatus_InvalidModelState_ReturnsBadRequest()
+    {
+        var (controller, _) = CreateController();
+        controller.ModelState.AddModelError("Status", "Required");
+
+        var result = await controller.UpdateStatus(1, new UpdateOrderStatusDto());
+
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    [Theory]
+    [InlineData(OrderStatus.Confirmed)]
+    [InlineData(OrderStatus.Preparing)]
+    [InlineData(OrderStatus.Ready)]
+    [InlineData(OrderStatus.Delivered)]
+    [InlineData(OrderStatus.Cancelled)]
+    public async Task UpdateStatus_EachValidStatus_ReturnsNoContent(OrderStatus status)
+    {
+        var (controller, mockService) = CreateController();
+        var dto = new UpdateOrderStatusDto { Status = status };
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+
+        var result = await controller.UpdateStatus(1, dto);
+
+        Assert.IsType<NoContentResult>(result);
+    }
 }
+

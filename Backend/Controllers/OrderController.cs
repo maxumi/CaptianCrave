@@ -41,4 +41,19 @@ public class OrdersController(IOrderService orderService) : ControllerBase
 
         return Ok(order);
     }
+
+    // PATCH: api/orders/{id}/status
+    [HttpPatch("{id}/status")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var updated = await _orderService.UpdateStatusAsync(id, dto);
+        if (!updated)
+            return NotFound();
+
+        return NoContent();
+    }
 }

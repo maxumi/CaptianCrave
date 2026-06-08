@@ -37,7 +37,10 @@ public class OrderService(
         {
             UserId = user.Id,
             RestaurantId = restaurant.Id,
-            CreatedAt = DateTime.UtcNow
+            DeliveryType = dto.DeliveryType,
+            DeliveryAddress = dto.DeliveryAddress,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         decimal total = 0;
@@ -62,4 +65,8 @@ public class OrderService(
 
         return created.ToDto();
     }
+
+    // Delegates status update to the repository.
+    public async Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto) =>
+        await _orderRepository.UpdateStatusAsync(id, dto.Status);
 }
