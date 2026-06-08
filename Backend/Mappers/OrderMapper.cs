@@ -25,8 +25,12 @@ public static class OrderMapper
         UserEmail = order.User?.Email ?? string.Empty,
         RestaurantId = order.RestaurantId,
         RestaurantName = order.Restaurant?.Name ?? string.Empty,
+        Status = order.Status,
+        DeliveryType = order.DeliveryType,
+        DeliveryAddress = order.DeliveryAddress,
         TotalPrice = order.TotalPrice,
         CreatedAt = order.CreatedAt,
+        UpdatedAt = order.UpdatedAt,
         Items = order.OrderItems.Select(i => i.ToDto())
     };
 

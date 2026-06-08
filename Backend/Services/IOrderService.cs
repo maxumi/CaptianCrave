@@ -10,4 +10,7 @@ public interface IOrderService
 
     // Validates and creates an order, returning the created order as a DTO.
     Task<OrderDto> CreateAsync(CreateOrderDto dto);
+
+    // Updates the status of an order. Returns false if the order does not exist.
+    Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto);
 }
