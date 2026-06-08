@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,15 +25,37 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasColumnName("restaurant_id")
             .IsRequired();
 
-        builder.Property(o => o.CreatedAt)
-            .HasColumnName("created_at")
+        builder.Property(o => o.Status)
+            .HasColumnName("status")
+            .HasConversion<string>()
+            .HasMaxLength(20)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValue(OrderStatus.Pending);
+
+        builder.Property(o => o.DeliveryType)
+            .HasColumnName("delivery_type")
+            .HasConversion<string>()
+            .HasMaxLength(10)
+            .IsRequired();
+
+        builder.Property(o => o.DeliveryAddress)
+            .HasColumnName("delivery_address")
+            .HasMaxLength(500);
 
         builder.Property(o => o.TotalPrice)
             .HasColumnName("total_price")
             .HasPrecision(10, 2)
             .IsRequired();
+
+        builder.Property(o => o.CreatedAt)
+            .HasColumnName("created_at")
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property(o => o.UpdatedAt)
+            .HasColumnName("updated_at")
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
 
         // Relations
         builder.HasOne(o => o.User)

@@ -1,4 +1,5 @@
 using Backend.Models;
+using Backend.Models.Enums;
 
 namespace Backend.Repositories;
 
@@ -10,4 +11,7 @@ public interface IOrderRepository
 
     // Saves a new order (with its items) and returns it with the generated ID.
     Task<Order> CreateAsync(Order order);
+
+    // Updates the status and updated_at of an existing order. Returns false if not found.
+    Task<bool> UpdateStatusAsync(int id, OrderStatus status);
 }

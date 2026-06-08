@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Models;
+using Backend.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Repositories;
@@ -25,5 +26,18 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
         return order;
+    }
+
+    // Updates the status and updated_at timestamp of an existing order.
+    public async Task<bool> UpdateStatusAsync(int id, OrderStatus status)
+    {
+        var order = await _db.Orders.FindAsync(id);
+        if (order is null)
+            return false;
+
+        order.Status = status;
+        order.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return true;
     }
 }
