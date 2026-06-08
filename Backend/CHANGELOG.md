@@ -5,6 +5,23 @@ Format: `[Date] - Summary` followed by details.
 
 ---
 
+## [2026-06-09] - Test suite overhaul: all controllers covered
+
+### Added
+- `OrderControllerTests` - full unit test coverage for `OrderController`:
+  - `GetById_ExistingId_ReturnsOk`, `GetById_ExistingId_ReturnsCorrectStatus`, `GetById_ExistingId_ReturnsOrderDto`, `GetById_NonExistingId_ReturnsNotFound`
+  - `Create_ValidDto_ReturnsCreatedAtAction`, `Create_ValidDto_ReturnsCreatedOrder`, `Create_ValidDto_PointsToGetByIdRoute`, `Create_InvalidModelState_ReturnsBadRequest`, `Create_UnknownUser_ReturnsBadRequest`, `Create_UnknownRestaurant_ReturnsBadRequest`, `Create_UnknownMenuItem_ReturnsBadRequest`
+  - `UpdateStatus_ExistingOrder_ReturnsNoContent`, `UpdateStatus_NonExistingOrder_ReturnsNotFound`, `UpdateStatus_InvalidModelState_ReturnsBadRequest`
+  - `[Theory]` - `UpdateStatus_EachValidStatus_ReturnsNoContent` (covers all 6 `OrderStatus` values)
+- `RestaurantControllerTests` - added `GetMenuItems_ReturnsOk`, `GetMenuItems_ReturnsItems`, `GetMenuItems_EmptyList_ReturnsOkWithEmptyCollection` for the nested route `GET /api/restaurants/{id}/menu-items`
+
+### Changed
+- `MenuItemControllerTests` - removed stale `GetByRestaurant` tests (endpoint was moved to `RestaurantsController`); updated `CreateController` helper to pass both `IMenuItemService` and `IRestaurantService` and to supply a mock `HttpContext` so `User.IsInRole` resolves correctly
+- `RestaurantControllerTests` - updated `CreateController` helper to pass both `IRestaurantService` and `IMenuItemService` (matches controller constructor)
+- `OrderControllerTests` - `MakeOrderDto` helper updated to include `Status`, `DeliveryType`, `DeliveryAddress`, `UpdatedAt`; `MakeCreateDto` updated to include `DeliveryType` and `DeliveryAddress`
+
+---
+
 ## [2026-06-08] - Order status, delivery type, and PATCH endpoint
 
 ### Added

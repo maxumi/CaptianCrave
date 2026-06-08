@@ -1,8 +1,10 @@
 using Backend.Controllers;
 using Backend.DTOs;
 using Backend.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace Backend.Tests.Controllers;
 
@@ -11,49 +13,14 @@ public class MenuItemControllerTests
     private static (MenuItemsController controller, Mock<IMenuItemService> mockService) CreateController()
     {
         var mockService = new Mock<IMenuItemService>();
-        var controller = new MenuItemsController(mockService.Object);
-        return (controller, mockService);
-    }
-
-    // GetByRestaurant
-
-    [Fact]
-    public async Task GetByRestaurant_ReturnsOk()
-    {
-        var (controller, mockService) = CreateController();
-        mockService.Setup(s => s.GetByRestaurantIdAsync(1)).ReturnsAsync([]);
-
-        var result = await controller.GetByRestaurant(1);
-
-        Assert.IsType<OkObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task GetByRestaurant_ReturnsMenuItems()
-    {
-        var (controller, mockService) = CreateController();
-        var items = new List<MenuItemDto>
+        var mockRestaurantService = new Mock<IRestaurantService>();
+        var controller = new MenuItemsController(mockService.Object, mockRestaurantService.Object);
+        var user = new ClaimsPrincipal(new ClaimsIdentity([]));
+        controller.ControllerContext = new ControllerContext
         {
-            new() { Id = 1, RestaurantId = 1, Name = "Burger", Price = 9.99m },
-            new() { Id = 2, RestaurantId = 1, Name = "Fries", Price = 3.49m }
+            HttpContext = new DefaultHttpContext { User = user }
         };
-        mockService.Setup(s => s.GetByRestaurantIdAsync(1)).ReturnsAsync(items);
-
-        var result = await controller.GetByRestaurant(1) as OkObjectResult;
-
-        Assert.Equal(items, result?.Value);
-    }
-
-    [Fact]
-    public async Task GetByRestaurant_EmptyList_ReturnsOkWithEmptyCollection()
-    {
-        var (controller, mockService) = CreateController();
-        mockService.Setup(s => s.GetByRestaurantIdAsync(99)).ReturnsAsync([]);
-
-        var result = await controller.GetByRestaurant(99) as OkObjectResult;
-
-        Assert.NotNull(result);
-        Assert.Empty((IEnumerable<MenuItemDto>)result.Value!);
+        return (controller, mockService);
     }
 
     // Create
