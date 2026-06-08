@@ -1,8 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../auth/auth.service';
+import { Role } from '../../shared/models/user';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,10 @@ import { AuthService } from '../auth/auth.service';
 export class Navbar {
   private readonly router = inject(Router);
   readonly authService = inject(AuthService);
+  readonly user = this.authService.user;
+  readonly profileRoute = computed(() =>
+    this.user()?.role === Role.Restaurant ? '/restaurant-edit' : '/profile'
+  );
   
   transLocoService = inject(TranslocoService);
   currentLang = signal(localStorage.getItem('lang') ?? 'en')
