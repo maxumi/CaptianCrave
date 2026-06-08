@@ -16,4 +16,9 @@ public interface IRestaurantService
 
     // Validates, creates, and returns the new restaurant as a DTO.
     Task<RestaurantDto> CreateAsync(CreateRestaurantDto dto);
+
+    Task<IEnumerable<RestaurantDto>> GetNearbyRestaurantsAsync(
+    double latitude,
+    double longitude,
+    double radiusKm);
 }

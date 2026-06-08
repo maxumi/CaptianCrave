@@ -17,5 +17,7 @@ public class RegisterRequestDto
     [MinLength(8)]
     public string Password { get; set; } = string.Empty;
 
+    public string Address { get; set; } = string.Empty;
+
     public UserRole Role { get; set; } = UserRole.Customer;
 }

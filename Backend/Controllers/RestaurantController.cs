@@ -23,6 +23,21 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
         return Ok(restaurants);
     }
 
+    [HttpGet("nearby")]
+    public async Task<IActionResult> GetNearby(
+        [FromQuery] double latitude,
+        [FromQuery] double longitude,
+        [FromQuery] double radiusKm = 10)
+    {
+        var restaurants =
+            await _restaurantService.GetNearbyRestaurantsAsync(
+                latitude,
+                longitude,
+                radiusKm);
+
+        return Ok(restaurants);
+    }
+
     // Returns a single restaurant by ID, or 404 if not found.
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
