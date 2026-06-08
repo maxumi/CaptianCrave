@@ -15,6 +15,14 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
     private readonly IRestaurantService _restaurantService = restaurantService;
     private readonly IMenuItemService _menuItemService = menuItemService;
 
+    private int? GetCurrentUserId()
+    {
+        var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        return int.TryParse(claimValue, out var userId) ? userId : null;
+    }
+
     // Returns every restaurant.
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -28,6 +36,21 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
     public async Task<IActionResult> GetById(int id)
     {
         var restaurant = await _restaurantService.GetByIdAsync(id);
+        if (restaurant is null)
+            return NotFound();
+
+        return Ok(restaurant);
+    }
+    
+    [HttpGet("me")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> GetMine()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+            return Unauthorized();
+
+        var restaurant = await _restaurantService.GetByUserIdAsync(userId.Value);
         if (restaurant is null)
             return NotFound();
 
@@ -49,6 +72,17 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        var userId = GetCurrentUserId();
+        if (userId is null)
+            return Unauthorized();
+
+        var existingRestaurant = await _restaurantService.GetByUserIdAsync(userId.Value);
+        if (existingRestaurant is not null)
+            return Conflict(new { message = "Restaurant profile already exists for this account." });
+
+        // Always bind a new restaurant to the authenticated user.
+        dto.UserId = userId.Value;
 
         var created = await _restaurantService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
