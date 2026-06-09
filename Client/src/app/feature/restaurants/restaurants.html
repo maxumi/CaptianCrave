@@ -31,7 +31,6 @@
           <div class="restaurant-card-content">
             <h2>{{ restaurant.name }}</h2>
             <p>{{ restaurant.description || restaurant.address }}</p>
-            <p class="restaurant-meta">{{ restaurant.address }}</p>
             <span
               class="restaurant-status status"
               [class.out]="!restaurant.isActive"
