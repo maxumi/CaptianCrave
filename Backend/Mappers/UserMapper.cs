@@ -13,6 +13,7 @@ public static class UserMapper
             Id = user.Id,
             Name = user.Name,
             Email = user.Email,
+            Address = user.Address,
             Role = user.Role.ToString(),
             Token = token
         };
@@ -23,6 +24,7 @@ public static class UserMapper
         {
             Name = dto.Name,
             Email = dto.Email,
+            Address = dto.Address,
             Role = dto.Role
         };
 }

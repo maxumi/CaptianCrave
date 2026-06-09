@@ -16,6 +16,24 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
         return restaurants.Select(r => r.ToDto());
     }
 
+    // Retrieves nearby restaurants within a specified radius.
+    public async Task<IEnumerable<RestaurantDto>> GetNearbyRestaurantsAsync(
+        double latitude,
+        double longitude,
+        double radiusKm)
+    {
+        var restaurants = await _restaurantRepository.GetAllAsync();
+
+        return restaurants
+            .Where(r =>
+                GetDistance(
+                    latitude,
+                    longitude,
+                    r.Latitude,
+                    r.Longitude) <= radiusKm)
+            .Select(r => r.ToDto());
+    }
+
     // Retrieves a restaurant by ID and maps it to a DTO.
     public async Task<RestaurantDto?> GetByIdAsync(int id)
     {
@@ -36,5 +54,36 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
         var restaurant = dto.ToRestaurant();
         var created = await _restaurantRepository.CreateAsync(restaurant);
         return created.ToDto();
+    }
+
+    // Calculates the distance between two geographic points using the Haversine formula.
+    private static double GetDistance(
+        double lat1,
+        double lon1,
+        double lat2,
+        double lon2)
+    {
+        const double R = 6371;
+
+        var dLat = DegreesToRadians(lat2 - lat1);
+        var dLon = DegreesToRadians(lon2 - lon1);
+
+        var a =
+            Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(DegreesToRadians(lat1)) *
+            Math.Cos(DegreesToRadians(lat2)) *
+            Math.Sin(dLon / 2) *
+            Math.Sin(dLon / 2);
+
+        var c = 2 * Math.Atan2(
+            Math.Sqrt(a),
+            Math.Sqrt(1 - a));
+
+        return R * c;
+    }
+
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180;
     }
 }
