@@ -69,4 +69,11 @@ public class OrderService(
     // Delegates status update to the repository.
     public async Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto) =>
         await _orderRepository.UpdateStatusAsync(id, dto.Status);
+
+    // Retrieves the active order for a user.
+    public async Task<OrderDto?> GetActiveOrderForUserAsync(int userId)
+    {
+        var order = await _orderRepository.GetActiveOrderForUserAsync(userId);
+        return order?.ToDto();
+    }
 }

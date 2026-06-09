@@ -32,10 +32,7 @@
           <p>{{ statusMessage }}</p>
 
           @if (order.status !== 'Delivered' && order.status !== 'Cancelled') {
-            <p class="delivery-time">
-              Estimated delivery:
-              <span>{{ order.estimatedDelivery | date: 'h:mm a' }}</span>
-            </p>
+            
           }
         </div>
       </div>

@@ -1,22 +1,11 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { OrderApiService, OrderStatus } from '../../shared/order-api.service';
-import { MockOrderApiService } from '../../shared/mock/mock-order-api-service';
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { OrderApiService, OrderStatus, OrderDto } from '../../shared/order-api.service';
 import { MatIconModule } from '@angular/material/icon';
+import { switchMap } from 'rxjs/operators';
 
-interface OrderDetails {
-  id: number;
-  restaurantName: string;
-  totalPrice: number;
-  status: OrderStatus;
-  createdAt: string;
-  estimatedDelivery: string;
-  items: {
-    menuItemName: string;
-    quantity: number;
-    price: number;
-  }[];
-}
+interface OrderDetails extends OrderDto {}
 
 interface OrderStep {
   label: string;
@@ -31,40 +20,43 @@ interface OrderStep {
   templateUrl: './order-status-view.html',
   styleUrl: './order-status-view.css',
 })
-export class OrderStatusView {
-  orderApiService = inject(OrderApiService);
+export class OrderStatusView implements OnInit {
+  private readonly orderApiService = inject(OrderApiService);
+  private readonly route = inject(ActivatedRoute);
 
-  // add when real API is ready
-  readonly isLoading = signal(false);
+  readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);
+  readonly order = signal<OrderDetails | null>(null);
 
-  readonly order = signal<OrderDetails | null>({
-    id: 524,
-    restaurantName: 'Captain Crave',
-    totalPrice: 159.5,
-    status: OrderStatus.OnTheWay,
-    createdAt: new Date(2026, 4, 21, 12, 30).toISOString(),
-    estimatedDelivery: new Date(2026, 4, 21, 12, 55).toISOString(),
-    items: [
-      {
-        menuItemName: 'Burger',
-        quantity: 2,
-        price: 59.75,
+  ngOnInit(): void {
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        const id = params.get('id');
+        if (!id) {
+          this.loadError.set('Order ID not found.');
+          this.isLoading.set(false);
+          throw new Error('Order ID not found');
+        }
+        return this.orderApiService.getOrderById(Number(id));
+      })
+    ).subscribe({
+      next: (order) => {
+        this.order.set(order);
+        this.isLoading.set(false);
       },
-      {
-        menuItemName: 'Fries',
-        quantity: 1,
-        price: 40,
-      },
-    ],
-  });
+      error: () => {
+        this.loadError.set('Failed to load order details.');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
-readonly steps: OrderStep[] = [
-  { label: 'Placed', status: OrderStatus.Pending, time: '12:30 PM', icon: 'check' },
-  { label: 'Preparing', status: OrderStatus.Preparing, time: '12:35 PM', icon: 'restaurant' },
-  { label: 'On the way', status: OrderStatus.OnTheWay, time: '12:45 PM', icon: 'two_wheeler' },
-  { label: 'Delivered', status: OrderStatus.Delivered, time: null, icon: 'home' },
-];
+  readonly steps: OrderStep[] = [
+    { label: 'Placed', status: OrderStatus.Pending, time: null, icon: 'check' },
+    { label: 'Preparing', status: OrderStatus.Preparing, time: null, icon: 'restaurant' },
+    { label: 'On the way', status: OrderStatus.OnTheWay, time: null, icon: 'two_wheeler' },
+    { label: 'Delivered', status: OrderStatus.Delivered, time: null, icon: 'home' },
+  ];
 
   get currentStepIndex(): number {
     const currentOrder = this.order();

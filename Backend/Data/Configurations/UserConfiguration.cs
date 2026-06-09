@@ -35,6 +35,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("address")
             .HasMaxLength(255);
 
+        builder.Property(u => u.Latitude)
+            .HasColumnName("latitude");
+
+        builder.Property(u => u.Longitude)
+            .HasColumnName("longitude");
+
         builder.Property(u => u.PasswordHash)
             .HasColumnName("password_hash")
             .IsRequired()

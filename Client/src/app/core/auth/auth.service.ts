@@ -9,6 +9,9 @@ interface RegisterRequest {
   email: string;
   password: string;
   role: Role;
+  address?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface LoginRequest {
@@ -20,6 +23,9 @@ interface AuthResponse {
   id: number;
   name: string;
   email: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
   role: string;
   token: string;
 }
@@ -43,6 +49,9 @@ export class AuthService {
             userId: response.id,
             name: response.name,
             email: response.email,
+            address: response.address ?? '',
+            latitude: response.latitude ?? null,
+            longitude: response.longitude ?? null,
             role: response.role,
             token: response.token,
           });
@@ -59,6 +68,9 @@ export class AuthService {
             userId: response.id,
             name: response.name,
             email: response.email,
+            address: response.address ?? '',
+            latitude: response.latitude ?? null,
+            longitude: response.longitude ?? null,
             role: response.role,
             token: response.token,
           }); 
@@ -106,6 +118,27 @@ export class AuthService {
 
     this.user.set(authState);
   }
+
+  updateCurrentUserProfile(profile: {
+    name: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+  }): void {
+    const current = this.user();
+    if (!current) {
+      return;
+    }
+
+    this.setAuthState({
+      ...current,
+      name: profile.name,
+      address: profile.address,
+      latitude: profile.latitude,
+      longitude: profile.longitude,
+    });
+  }
+
   isLoggedIn(): boolean {
     return !!this.user()?.token;
   }

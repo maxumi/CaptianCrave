@@ -13,4 +13,7 @@ public interface IOrderService
 
     // Updates the status of an order. Returns false if the order does not exist.
     Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto);
+
+    // Returns the active order for a user, or null if none exists.
+    Task<OrderDto?> GetActiveOrderForUserAsync(int userId);
 }

@@ -7,6 +7,9 @@ export interface AuthState {
   userId: number;
   name: string;
   email: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
   role: string;
   token: string;
 }

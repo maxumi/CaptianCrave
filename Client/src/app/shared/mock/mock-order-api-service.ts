@@ -9,6 +9,11 @@ export enum OrderStatus {
   Cancelled = 'Cancelled',
 }
 
+export enum DeliveryType {
+  Delivery = 0,
+  Pickup = 1,
+}
+
 export interface CreateOrderItemRequest {
   menuItemId: number;
   quantity: number;
@@ -17,6 +22,8 @@ export interface CreateOrderItemRequest {
 export interface CreateOrderRequest {
   userId: number;
   restaurantId: number;
+  deliveryType: DeliveryType;
+  deliveryAddress?: string;
   items: CreateOrderItemRequest[];
 }
 

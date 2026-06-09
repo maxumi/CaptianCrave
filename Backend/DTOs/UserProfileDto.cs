@@ -1,9 +1,6 @@
-using Backend.Models.Enums;
+namespace Backend.DTOs;
 
-namespace Backend.Models;
-
-// Represents a user stored in the database
-public class User
+public class UserProfileDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -11,7 +8,5 @@ public class User
     public string Address { get; set; } = string.Empty;
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
-    public string PasswordHash { get; set; } = string.Empty;
-    public UserRole Role { get; set; } = UserRole.Customer;
-    public DateTime CreatedAt { get; set; }
+    public string Role { get; set; } = string.Empty;
 }
