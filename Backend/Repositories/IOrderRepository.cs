@@ -14,4 +14,7 @@ public interface IOrderRepository
 
     // Updates the status and updated_at of an existing order. Returns false if not found.
     Task<bool> UpdateStatusAsync(int id, OrderStatus status);
+
+    // Returns the first active order for a user, or null if none exist.
+    Task<Order?> GetActiveOrderForUserAsync(int userId);
 }

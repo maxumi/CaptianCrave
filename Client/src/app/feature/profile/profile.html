@@ -14,12 +14,21 @@
       class="form-input"
       type="text"
       placeholder="Enter new address"
-      [(ngModel)]="addressInput"
+      [ngModel]="addressInput()"
+      (ngModelChange)="addressInput.set($event)"
     />
 
     <button class="form-button" type="button" (click)="saveAddress()">
       Save address
     </button>
+
+    @if (saveError()) {
+      <p class="profile-state profile-state-error">{{ saveError() }}</p>
+    }
+
+    @if (saveSuccess()) {
+      <p class="profile-state profile-state-success">{{ saveSuccess() }}</p>
+    }
 
     <div id="profile-map"></div>
   </div>

@@ -26,4 +26,20 @@ public class UserRepository(AppDbContext db) : IUserRepository
         await db.SaveChangesAsync();
         return user;
     }
+
+    // Updates profile fields for a user and returns the updated entity.
+    public async Task<User?> UpdateProfileAsync(int userId, string name, string address, double? latitude, double? longitude)
+    {
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null)
+            return null;
+
+        user.Name = name;
+        user.Address = address;
+        user.Latitude = latitude;
+        user.Longitude = longitude;
+
+        await db.SaveChangesAsync();
+        return user;
+    }
 }

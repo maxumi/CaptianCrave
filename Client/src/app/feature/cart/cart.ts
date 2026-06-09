@@ -1,8 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CartService, CartItem } from '../../shared/cart.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { OrderApiService } from '../../shared/order-api.service';
+import { DeliveryType, OrderApiService } from '../../shared/order-api.service';
+import { RestaurantApiService } from '../../shared/restaurant-api.service';
 import { firstValueFrom } from 'rxjs';
 import { Role } from '../../shared/models/user';
 
@@ -12,10 +14,12 @@ import { Role } from '../../shared/models/user';
   templateUrl: './cart.html',
   styleUrl: './cart.css',
 })
-export class Cart {
+export class Cart implements OnInit {
   readonly cartService = inject(CartService);
   private readonly authService = inject(AuthService);
   private readonly orderApiService = inject(OrderApiService);
+  private readonly restaurantApiService = inject(RestaurantApiService);
+  private readonly router = inject(Router);
 
   readonly cartItems = this.cartService.items;
   readonly total = this.cartService.total;
@@ -23,6 +27,14 @@ export class Cart {
   readonly checkoutError = signal<string | null>(null);
   readonly checkoutSuccess = signal<string | null>(null);
   readonly canCheckout = computed(() => this.authService.user()?.role === Role.Customer);
+
+  ngOnInit(): void {
+    this.orderApiService.getActiveOrder().subscribe(order => {
+      if (order) {
+        this.router.navigate(['/order-status', order.id]);
+      }
+    });
+  }
 
   onQuantityInput(item: CartItem, event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -65,15 +77,22 @@ export class Cart {
       return;
     }
 
+    if (!user.address || user.latitude == null || user.longitude == null) {
+      this.checkoutError.set('Please update your profile address before checkout.');
+      return;
+    }
+
     const restaurantId = items[0].restaurantId;
 
     this.isSubmittingOrder.set(true);
 
     try {
-      await firstValueFrom(
+      const order = await firstValueFrom(
         this.orderApiService.createOrder({
           userId: user.userId,
           restaurantId,
+          deliveryType: DeliveryType.Delivery,
+          deliveryAddress: user.address,
           items: items.map((item) => ({
             menuItemId: item.menuItemId,
             quantity: item.quantity,
@@ -82,7 +101,7 @@ export class Cart {
       );
 
       this.cartService.clear();
-      this.checkoutSuccess.set('Order placed successfully.');
+      this.router.navigate(['/order-status', order.id]);
     } catch (error) {
       const httpError = error as HttpErrorResponse;
       const backendMessage =

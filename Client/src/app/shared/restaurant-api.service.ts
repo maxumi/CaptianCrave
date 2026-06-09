@@ -45,4 +45,18 @@ export class RestaurantApiService {
   getMyRestaurant(): Observable<RestaurantDto> {
     return this.http.get<RestaurantDto>(`${this.restaurantsUrl}/me`);
   }
+
+  getNearbyRestaurants(
+    latitude: number,
+    longitude: number,
+    radiusKm = 10
+  ): Observable<RestaurantDto[]> {
+    return this.http.get<RestaurantDto[]>(`${this.restaurantsUrl}/nearby`, {
+      params: {
+        latitude,
+        longitude,
+        radiusKm,
+      },
+    });
+  }
 }

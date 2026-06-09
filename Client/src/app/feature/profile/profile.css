@@ -24,6 +24,18 @@
   margin: 8px 0;
 }
 
+.profile-state {
+  margin: 12px 0 0;
+}
+
+.profile-state-error {
+  color: #b00020;
+}
+
+.profile-state-success {
+  color: #0b6e4f;
+}
+
 #profile-map {
   height: 260px;
   width: 100%;

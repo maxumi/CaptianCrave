@@ -15,6 +15,17 @@ public class MenuItemsController(IMenuItemService menuItemService, IRestaurantSe
     private readonly IMenuItemService _menuItemService = menuItemService;
     private readonly IRestaurantService _restaurantService = restaurantService;
 
+    // Returns all menu items for the specified restaurant.
+    [HttpGet("restaurant/{restaurantId:int}")]
+    public async Task<IActionResult> GetByRestaurantId(int restaurantId)
+    {
+        if (restaurantId <= 0)
+            return BadRequest();
+
+        var items = await _menuItemService.GetByRestaurantIdAsync(restaurantId);
+        return Ok(items);
+    }
+
     private int? GetCurrentUserId()
     {
         var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)

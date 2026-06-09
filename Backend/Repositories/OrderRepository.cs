@@ -40,4 +40,16 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
         await _db.SaveChangesAsync();
         return true;
     }
+
+    // Finds the first order for a user that is not delivered or cancelled.
+    public async Task<Order?> GetActiveOrderForUserAsync(int userId) =>
+        await _db.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+            .Include(o => o.User)
+            .Include(o => o.Restaurant)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.UserId == userId
+                && o.Status != OrderStatus.Delivered
+                && o.Status != OrderStatus.Cancelled);
 }

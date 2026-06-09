@@ -42,7 +42,20 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         return Ok(order);
     }
 
-    // PATCH: api/orders/{id}/status
+    // GET: api/orders/active — returns the active order for the current user.
+    [HttpGet("active")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetActiveOrder()
+    {
+        var userId = User.GetId();
+        var order = await _orderService.GetActiveOrderForUserAsync(userId);
+        if (order is null)
+            return NotFound();
+
+        return Ok(order);
+    }
+
+    // PATCH: api/orders/{id}/status")]
     [HttpPatch("{id}/status")]
     [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusDto dto)

@@ -76,7 +76,7 @@
   },
     "restaurants": {
       "title": "Restauranter nær dig",
-      "subtitle": "Statiske eksempelrestauranter for nu.",
+      "subtitle": "",
       "status": {
         "open": "Åben",
         "closed": "Lukket"

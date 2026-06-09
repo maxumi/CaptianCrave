@@ -14,6 +14,8 @@ public static class UserMapper
             Name = user.Name,
             Email = user.Email,
             Address = user.Address,
+            Latitude = user.Latitude,
+            Longitude = user.Longitude,
             Role = user.Role.ToString(),
             Token = token
         };
@@ -25,6 +27,8 @@ public static class UserMapper
             Name = dto.Name,
             Email = dto.Email,
             Address = dto.Address,
+            Latitude = dto.Latitude,
+            Longitude = dto.Longitude,
             Role = dto.Role
         };
 }

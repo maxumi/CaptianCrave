@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<User?> GetByEmailAsync(string email);
     Task<bool> EmailExistsAsync(string email);
     Task<User> CreateAsync(User user);
+    Task<User?> UpdateProfileAsync(int userId, string name, string address, double? latitude, double? longitude);
 }

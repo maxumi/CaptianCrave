@@ -76,7 +76,7 @@
   },
   "restaurants": {
     "title": "Restaurants near you",
-    "subtitle": "Static example restaurants for now.",
+    "subtitle": "",
     "status": {
       "open": "Open",
       "closed": "Closed"
