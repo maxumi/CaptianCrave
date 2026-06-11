@@ -3,14 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { OrderStatus } from './models/status';
 
-export enum OrderStatus {
-  Pending = 'Pending',
-  Preparing = 'Preparing',
-  OnTheWay = 'On the way',
-  Delivered = 'Delivered',
-  Cancelled = 'Cancelled',
-}
 
 export enum DeliveryType {
   Delivery = 0,
@@ -78,10 +72,15 @@ export class OrderApiService {
     return this.http.get<OrderDto[]>(`${this.ordersUrl}/restaurant/${restaurantId}`);
   }
 
-  updateOrderStatus(orderId: number, payload: UpdateOrderStatusRequest): Observable<OrderDto> {
-    return this.http.put<OrderDto>(`${this.ordersUrl}/${orderId}`, payload);
+  updateOrderStatus(
+    orderId: number,
+    payload: UpdateOrderStatusRequest
+  ): Observable<OrderDto> {
+    return this.http.patch<OrderDto>(
+      `${this.ordersUrl}/${orderId}/status`,
+      payload
+    );
   }
-
   getOrderById(orderId: number): Observable<OrderDto> {
     return this.http.get<OrderDto>(`${this.ordersUrl}/${orderId}`);
   }

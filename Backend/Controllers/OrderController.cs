@@ -54,19 +54,34 @@ public class OrdersController(IOrderService orderService) : ControllerBase
 
         return Ok(order);
     }
+    
+    [HttpGet("restaurant/{restaurantId}")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> GetByRestaurant(int restaurantId)
+    {
+        var orders = await _orderService.GetByRestaurantAsync(restaurantId);
+        return Ok(orders);
+    }
+
 
     // PATCH: api/orders/{id}/status")]
     [HttpPatch("{id}/status")]
     [Authorize(Roles = "Restaurant,Admin")]
-    public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusDto dto)
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateOrderStatusDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var updated = await _orderService.UpdateStatusAsync(id, dto);
+
         if (!updated)
             return NotFound();
 
-        return NoContent();
+        var order = await _orderService.GetByIdAsync(id);
+
+        if (order is null)
+            return NotFound();
+
+        return Ok(order);
     }
 }

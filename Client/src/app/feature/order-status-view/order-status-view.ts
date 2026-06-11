@@ -1,16 +1,16 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { OrderApiService, OrderStatus, OrderDto } from '../../shared/order-api.service';
+import { OrderApiService, OrderDto } from '../../shared/order-api.service';
 import { MatIconModule } from '@angular/material/icon';
 import { switchMap } from 'rxjs/operators';
+import { OrderStatus } from '../../shared/models/status';
 
 interface OrderDetails extends OrderDto {}
 
 interface OrderStep {
   label: string;
   status: OrderStatus;
-  time: string | null;
   icon: string;
 }
 
@@ -23,6 +23,8 @@ interface OrderStep {
 export class OrderStatusView implements OnInit {
   private readonly orderApiService = inject(OrderApiService);
   private readonly route = inject(ActivatedRoute);
+  readonly OrderStatus = OrderStatus;
+
 
   readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -52,10 +54,10 @@ export class OrderStatusView implements OnInit {
   }
 
   readonly steps: OrderStep[] = [
-    { label: 'Placed', status: OrderStatus.Pending, time: null, icon: 'check' },
-    { label: 'Preparing', status: OrderStatus.Preparing, time: null, icon: 'restaurant' },
-    { label: 'On the way', status: OrderStatus.OnTheWay, time: null, icon: 'two_wheeler' },
-    { label: 'Delivered', status: OrderStatus.Delivered, time: null, icon: 'home' },
+    { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
+    { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
+    { label: 'On the way', status: OrderStatus.OnTheWay, icon: 'two_wheeler' },
+    { label: 'Delivered', status: OrderStatus.Delivered, icon: 'home' },
   ];
 
   get currentStepIndex(): number {
@@ -81,7 +83,20 @@ export class OrderStatusView implements OnInit {
   }
 
   get statusTitle(): string {
-    return this.order()?.status ?? OrderStatus.Pending;
+    switch (this.order()?.status) {
+      case OrderStatus.Pending:
+        return 'Pending';
+      case OrderStatus.Preparing:
+        return 'Preparing';
+      case OrderStatus.OnTheWay:
+        return 'On the way';
+      case OrderStatus.Delivered:
+        return 'Delivered';
+      case OrderStatus.Cancelled:
+        return 'Cancelled';
+      default:
+        return 'Pending';
+    }
   }
 
   get statusMessage(): string {

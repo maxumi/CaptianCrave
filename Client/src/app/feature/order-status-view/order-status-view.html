@@ -16,11 +16,11 @@
 
       <div class="current-status">
         <div class="current-status-icon">
-          @if (order.status === 'On the way') {
+          @if (order.status === OrderStatus.OnTheWay) {
             <mat-icon>two_wheeler</mat-icon>
-          } @else if (order.status === 'Preparing') {
+          } @else if (order.status === OrderStatus.Preparing) {
             <mat-icon>restaurant</mat-icon>
-          } @else if (order.status === 'Delivered') {
+          } @else if (order.status === OrderStatus.Delivered) {
             <mat-icon>home</mat-icon>
           } @else {
             <mat-icon>check</mat-icon>
@@ -31,8 +31,7 @@
           <h2>{{ statusTitle }}</h2>
           <p>{{ statusMessage }}</p>
 
-          @if (order.status !== 'Delivered' && order.status !== 'Cancelled') {
-            
+          @if (order.status !== OrderStatus.Delivered && order.status !== OrderStatus.Cancelled) {
           }
         </div>
       </div>
@@ -52,9 +51,6 @@
             </div>
 
             <p class="step-label">{{ step.label }}</p>
-            <p class="step-time">
-              {{ step.time ?? '-:-' }}
-            </p>
           </div>
         }
       </div>

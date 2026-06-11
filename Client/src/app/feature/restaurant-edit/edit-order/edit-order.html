@@ -38,7 +38,7 @@
         <span>{{ order.totalPrice }}kr.</span>
 
         <span>
-          <span class="status" [class.out]="order.status === 'Cancelled'">
+          <span class="status" [class.out]="order.status === OrderStatus.Cancelled">
             {{ order.status }}
           </span>
         </span>
@@ -71,11 +71,11 @@
       <label>
         Status
         <select class="form-control" [formField]="orderForm.status">
-          <option value="Pending">Pending</option>
-          <option value="Preparing">Preparing</option>
-          <option value="On the way">On the way</option>
-          <option value="Delivered">Delivered</option>
-          <option value="Cancelled">Cancelled</option>
+          <option value="pending">Pending</option>
+          <option value="preparing">Preparing</option>
+          <option value="onTheWay">On the way</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </label>
 

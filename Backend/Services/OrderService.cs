@@ -66,6 +66,14 @@ public class OrderService(
         return created.ToDto();
     }
 
+    public async Task<IEnumerable<OrderDto>> GetByRestaurantAsync(int restaurantId)
+    {
+        var orders = await _orderRepository.GetByRestaurantAsync(restaurantId);
+
+        return orders.Select(order => order.ToDto());
+    }
+
+
     // Delegates status update to the repository.
     public async Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto) =>
         await _orderRepository.UpdateStatusAsync(id, dto.Status);

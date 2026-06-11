@@ -9,10 +9,10 @@ import { RestaurantApiService } from '../../../shared/restaurant-api.service';
 import {
   OrderApiService,
   OrderDto,
-  OrderStatus,
   UpdateOrderStatusRequest,
 } from '../../../shared/order-api.service';
 import { MockOrderApiService } from '../../../shared/mock/mock-order-api-service';
+import { OrderStatus } from '../../../shared/models/status';
 
 interface OrderDraft {
   status: OrderStatus;
@@ -28,7 +28,8 @@ interface OrderDraft {
 })
 export class EditOrder implements OnInit {
   private readonly restaurantApiService = inject(RestaurantApiService);
-  private readonly orderApiService = inject(MockOrderApiService);
+  private readonly orderApiService = inject(OrderApiService);
+  readonly OrderStatus = OrderStatus;
 
   readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);

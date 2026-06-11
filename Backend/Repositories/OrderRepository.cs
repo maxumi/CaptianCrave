@@ -41,6 +41,18 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
         return true;
     }
 
+    public async Task<IEnumerable<Order>> GetByRestaurantAsync(int restaurantId) =>
+        await _db.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+            .Include(o => o.User)
+            .Include(o => o.Restaurant)
+            .AsNoTracking()
+            .Where(o => o.RestaurantId == restaurantId)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+
     // Finds the first order for a user that is not delivered or cancelled.
     public async Task<Order?> GetActiveOrderForUserAsync(int userId) =>
         await _db.Orders
