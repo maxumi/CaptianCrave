@@ -1,18 +1,29 @@
+using Backend.Models.Enums;
 using System.Security.Claims;
 
 namespace Backend.Services;
 
-
 public static class ClaimsPrincipalExtensions
 {
     /// <summary>
-    /// Returns a user id from claim assocatied with user
+    /// Returns the user ID from the claims associated with the authenticated user.
     /// </summary>
-    /// <param name="user"></param>
-    /// <returns></returns>
     public static int GetId(this ClaimsPrincipal user)
     {
         var id = user.FindFirstValue(ClaimTypes.NameIdentifier);
         return int.Parse(id);
+    }
+
+    /// <summary>
+    /// Returns the user role from the claims associated with the authenticated user.
+    /// </summary>
+    public static UserRole GetRole(this ClaimsPrincipal user)
+    {
+        var role = user.FindFirstValue(ClaimTypes.Role);
+
+        if (!Enum.TryParse<UserRole>(role, out var userRole))
+            throw new UnauthorizedAccessException("Invalid user role.");
+
+        return userRole;
     }
 }

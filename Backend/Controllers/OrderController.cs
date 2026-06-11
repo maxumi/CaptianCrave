@@ -75,7 +75,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<IActionResult> GetRestaurantActiveOrders()
     {
         var userId = User.GetId();
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var role = User.GetRole();
         try
         {
             var orders = await _orderService.GetRestaurantActiveOrdersAsync(userId, role);
@@ -100,7 +100,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<IActionResult> GetRestaurantHistoricOrders()
     {
         var userId = User.GetId();
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var role = User.GetRole();
         try
         {
             var orders = await _orderService.GetRestaurantHistoricOrdersAsync(userId, role);
@@ -129,7 +129,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
             return BadRequest(ModelState);
 
         var userId = User.GetId();
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        var role = User.GetRole();
 
         bool updated;
         try

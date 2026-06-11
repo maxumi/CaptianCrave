@@ -67,30 +67,30 @@ public class OrderService(
         return created.ToDto();
     }
 
-    public async Task<IEnumerable<OrderDto>> GetRestaurantActiveOrdersAsync(int actorUserId, string actorRole)
+    public async Task<IEnumerable<OrderDto>> GetRestaurantActiveOrdersAsync(int currentUserId, UserRole currentUserRole)
     {
-        var restaurantId = await ResolveRestaurantIdForActorAsync(actorUserId, actorRole);
+        var restaurantId = await ResolveRestaurantIdForUserAsync(currentUserId, currentUserRole);
         var orders = await _orderRepository.GetActiveByRestaurantAsync(restaurantId);
         return orders.Select(order => order.ToDto());
     }
 
-    public async Task<IEnumerable<OrderDto>> GetRestaurantHistoricOrdersAsync(int actorUserId, string actorRole)
+    public async Task<IEnumerable<OrderDto>> GetRestaurantHistoricOrdersAsync(int currentUserId, UserRole currentUserRole)
     {
-        var restaurantId = await ResolveRestaurantIdForActorAsync(actorUserId, actorRole);
+        var restaurantId = await ResolveRestaurantIdForUserAsync(currentUserId, currentUserRole);
         var orders = await _orderRepository.GetHistoryByRestaurantAsync(restaurantId);
         return orders.Select(order => order.ToDto());
     }
 
     // Validates ownership + transition rules and delegates status update to repository.
-    public async Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto, int actorUserId, string actorRole)
+    public async Task<bool> UpdateStatusAsync(int id, UpdateOrderStatusDto dto, int currentUserId, UserRole currentUserRole)
     {
         var order = await _orderRepository.GetByIdAsync(id);
         if (order is null)
             return false;
 
-        if (actorRole == "Restaurant")
+        if (currentUserRole == UserRole.Restaurant)
         {
-            var restaurant = await _restaurantRepository.GetSingleByUserIdAsync(actorUserId)
+            var restaurant = await _restaurantRepository.GetSingleByUserIdAsync(currentUserId)
                 ?? throw new UnauthorizedAccessException("Restaurant profile not found for current user.");
 
             if (order.RestaurantId != restaurant.Id)
@@ -119,12 +119,15 @@ public class OrderService(
         return orders.Select(order => order.ToDto());
     }
 
-    private async Task<int> ResolveRestaurantIdForActorAsync(int actorUserId, string actorRole)
+    /// <summary>
+    /// Finds the restaurant linked to the current user and returns its ID.
+    /// </summary>
+    private async Task<int> ResolveRestaurantIdForUserAsync(int currentUserId, UserRole currentUserRole)
     {
-        if (actorRole == "Admin")
+        if (currentUserRole == UserRole.Admin)
             throw new InvalidOperationException("Admin must use explicit admin reporting endpoints.");
 
-        var restaurant = await _restaurantRepository.GetSingleByUserIdAsync(actorUserId)
+        var restaurant = await _restaurantRepository.GetSingleByUserIdAsync(currentUserId)
             ?? throw new KeyNotFoundException("Restaurant profile not found for current user.");
 
         return restaurant.Id;
