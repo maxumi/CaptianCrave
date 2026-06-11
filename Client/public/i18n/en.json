@@ -76,7 +76,7 @@
   },
   "restaurants": {
     "title": "Restaurants near you",
-    "subtitle": "",
+    "subtitle": " ",
     "status": {
       "open": "Open",
       "closed": "Closed"
