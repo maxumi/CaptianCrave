@@ -1,15 +1,25 @@
 <header class="menu-header">
   <div>
     <h1>Manage Orders</h1>
-    <p>View and update customer order statuses</p>
+    <p>View active orders by default and browse historic orders separately.</p>
   </div>
 </header>
+
+<section class="card" style="padding: 12px; margin-bottom: 16px; display: flex; gap: 8px;">
+  <button type="button" class="btn" [class.save-btn]="mode() === 'active'" (click)="setMode('active')">
+    Active Orders
+  </button>
+  <button type="button" class="btn" [class.save-btn]="mode() === 'history'" (click)="setMode('history')">
+    Historic Orders
+  </button>
+</section>
 
 <section class="menu-table card" aria-label="Restaurant orders">
   <div class="table-head order-head">
     <span>Order</span>
     <span>Customer</span>
     <span>Total</span>
+    <span>Type</span>
     <span>Status</span>
     <span>Action</span>
   </div>
@@ -36,6 +46,7 @@
 
         <span>{{ order.userName }}</span>
         <span>{{ order.totalPrice }}kr.</span>
+        <span>{{ order.deliveryType }}</span>
 
         <span>
           <span class="status" [class.out]="order.status === OrderStatus.Cancelled">
@@ -57,9 +68,14 @@
       <div>
         <h2>Order #{{ selectedOrder()?.id }}</h2>
         <p>{{ selectedOrder()?.createdAt | date: 'medium' }}</p>
+        @if (isSelectedOrderHistoric()) {
+          <p>This is a historic order and cannot be edited.</p>
+        }
       </div>
 
-      <button type="submit" class="btn save-btn">Save Changes</button>
+      @if (!isSelectedOrderHistoric()) {
+        <button type="submit" class="btn save-btn">Save Changes</button>
+      }
     </header>
 
     <div class="edit-form">
@@ -70,13 +86,15 @@
 
       <label>
         Status
-        <select class="form-control" [formField]="orderForm.status">
-          <option value="pending">Pending</option>
-          <option value="preparing">Preparing</option>
-          <option value="onTheWay">On the way</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        @if (isSelectedOrderHistoric()) {
+          <input class="form-control" type="text" [value]="selectedOrder()?.status" disabled />
+        } @else {
+          <select class="form-control" [formField]="orderForm.status">
+            @for (status of selectableStatuses(); track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        }
       </label>
 
       <label>

@@ -41,7 +41,7 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
         return true;
     }
 
-    public async Task<IEnumerable<Order>> GetByRestaurantAsync(int restaurantId) =>
+    public async Task<IEnumerable<Order>> GetActiveByRestaurantAsync(int restaurantId) =>
         await _db.Orders
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
@@ -49,6 +49,21 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
             .Include(o => o.Restaurant)
             .AsNoTracking()
             .Where(o => o.RestaurantId == restaurantId)
+            .Where(o => o.Status != OrderStatus.Delivered
+                && o.Status != OrderStatus.Cancelled)
+            .OrderByDescending(o => o.UpdatedAt)
+            .ToListAsync();
+
+    public async Task<IEnumerable<Order>> GetHistoryByRestaurantAsync(int restaurantId) =>
+        await _db.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+            .Include(o => o.User)
+            .Include(o => o.Restaurant)
+            .AsNoTracking()
+            .Where(o => o.RestaurantId == restaurantId)
+            .Where(o => o.Status == OrderStatus.Delivered
+                || o.Status == OrderStatus.Cancelled)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
 
@@ -64,4 +79,17 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
             .FirstOrDefaultAsync(o => o.UserId == userId
                 && o.Status != OrderStatus.Delivered
                 && o.Status != OrderStatus.Cancelled);
+
+    public async Task<IEnumerable<Order>> GetHistoryForUserAsync(int userId) =>
+        await _db.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+            .Include(o => o.User)
+            .Include(o => o.Restaurant)
+            .AsNoTracking()
+            .Where(o => o.UserId == userId)
+            .Where(o => o.Status == OrderStatus.Delivered
+                || o.Status == OrderStatus.Cancelled)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
 }

@@ -2,6 +2,7 @@ using Backend.DTOs;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Backend.Controllers;
 
@@ -43,9 +44,9 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     }
 
     // GET: api/orders/active — returns the active order for the current user.
-    [HttpGet("active")]
+    [HttpGet("customer/active")]
     [Authorize(Roles = "Customer")]
-    public async Task<IActionResult> GetActiveOrder()
+    public async Task<IActionResult> GetActiveOrderForCustomer()
     {
         var userId = User.GetId();
         var order = await _orderService.GetActiveOrderForUserAsync(userId);
@@ -54,15 +55,70 @@ public class OrdersController(IOrderService orderService) : ControllerBase
 
         return Ok(order);
     }
-    
-    [HttpGet("restaurant/{restaurantId}")]
-    [Authorize(Roles = "Restaurant,Admin")]
-    public async Task<IActionResult> GetByRestaurant(int restaurantId)
+
+    // Backward-compatible route alias for existing clients.
+    [HttpGet("active")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetActiveOrder() => await GetActiveOrderForCustomer();
+
+    [HttpGet("customer/history")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetCustomerHistory()
     {
-        var orders = await _orderService.GetByRestaurantAsync(restaurantId);
+        var userId = User.GetId();
+        var orders = await _orderService.GetHistoricOrdersForUserAsync(userId);
         return Ok(orders);
     }
 
+    [HttpGet("restaurant/active")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> GetRestaurantActiveOrders()
+    {
+        var userId = User.GetId();
+        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        try
+        {
+            var orders = await _orderService.GetRestaurantActiveOrdersAsync(userId, role);
+            return Ok(orders);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("restaurant/history")]
+    [Authorize(Roles = "Restaurant,Admin")]
+    public async Task<IActionResult> GetRestaurantHistoricOrders()
+    {
+        var userId = User.GetId();
+        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+        try
+        {
+            var orders = await _orderService.GetRestaurantHistoricOrdersAsync(userId, role);
+            return Ok(orders);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
     // PATCH: api/orders/{id}/status")]
     [HttpPatch("{id}/status")]
@@ -72,7 +128,26 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var updated = await _orderService.UpdateStatusAsync(id, dto);
+        var userId = User.GetId();
+        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+
+        bool updated;
+        try
+        {
+            updated = await _orderService.UpdateStatusAsync(id, dto, userId, role);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
 
         if (!updated)
             return NotFound();

@@ -1,25 +1,23 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
-import { catchError, EMPTY, finalize, firstValueFrom, map, of, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, firstValueFrom, map, of, tap } from 'rxjs';
 
-import { AuthService } from '../../../core/auth/auth.service';
-import { RestaurantApiService } from '../../../shared/restaurant-api.service';
 import {
+  DeliveryType,
   OrderApiService,
   OrderDto,
   UpdateOrderStatusRequest,
 } from '../../../shared/order-api.service';
-import { MockOrderApiService } from '../../../shared/mock/mock-order-api-service';
 import { OrderStatus } from '../../../shared/models/status';
 
 interface OrderDraft {
   status: OrderStatus;
 }
-/**
- * CURRENTLY USES MOCK SERVICE. REPLACE WITH REAL SERVICE WHEN BACKEND IS READY.
- */
+
+type OrderMode = 'active' | 'history';
+
 @Component({
   selector: 'app-edit-order',
   imports: [DatePipe, FormField, FormRoot],
@@ -27,7 +25,6 @@ interface OrderDraft {
   styleUrl: './edit-order.css',
 })
 export class EditOrder implements OnInit {
-  private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly orderApiService = inject(OrderApiService);
   readonly OrderStatus = OrderStatus;
 
@@ -35,8 +32,30 @@ export class EditOrder implements OnInit {
   readonly loadError = signal<string | null>(null);
   readonly saveError = signal<string | null>(null);
   readonly saveSuccess = signal<string | null>(null);
-  readonly orders = signal<OrderDto[]>([]);
+  readonly mode = signal<OrderMode>('active');
+  readonly activeOrders = signal<OrderDto[]>([]);
+  readonly historicOrders = signal<OrderDto[]>([]);
+  readonly orders = computed(() =>
+    this.mode() === 'active' ? this.activeOrders() : this.historicOrders()
+  );
   readonly selectedOrder = signal<OrderDto | null>(null);
+  readonly isSelectedOrderHistoric = computed(() => {
+    const order = this.selectedOrder();
+    if (!order) {
+      return false;
+    }
+
+    return order.status === OrderStatus.Delivered || order.status === OrderStatus.Cancelled;
+  });
+
+  readonly selectableStatuses = computed(() => {
+    const order = this.selectedOrder();
+    if (!order || this.isSelectedOrderHistoric()) {
+      return [] as OrderStatus[];
+    }
+
+    return [order.status, ...this.getNextAllowedStatuses(order)];
+  });
 
   readonly orderModel = signal<OrderDraft>({
     status: OrderStatus.Pending,
@@ -49,30 +68,53 @@ export class EditOrder implements OnInit {
   });
 
   ngOnInit() {
-    this.loadOrders();
+    this.loadOrders('active');
   }
 
-  private loadOrders(): void {
+  setMode(mode: OrderMode): void {
+    if (this.mode() === mode) {
+      return;
+    }
+
+    this.mode.set(mode);
+    this.selectedOrder.set(null);
+    this.orderModel.set({ status: OrderStatus.Pending });
+    this.saveError.set(null);
+    this.saveSuccess.set(null);
+
+    const hasData = mode === 'active' ? this.activeOrders().length > 0 : this.historicOrders().length > 0;
+    if (!hasData) {
+      this.loadOrders(mode);
+    }
+  }
+
+  private loadOrders(mode: OrderMode): void {
     this.isLoading.set(true);
     this.loadError.set(null);
     this.saveError.set(null);
     this.saveSuccess.set(null);
 
-    this.restaurantApiService.getMyRestaurant().pipe(
-      switchMap(restaurant =>
-        this.orderApiService.getOrdersByRestaurant(restaurant.id)
-      ),
+    const request$ = mode === 'active'
+      ? this.orderApiService.getRestaurantActiveOrders()
+      : this.orderApiService.getRestaurantHistoricOrders();
+
+    request$.pipe(
 
       catchError((error: { status?: number }) => {
         if (error.status === 401 || error.status === 403) {
           this.loadError.set('You are not allowed to manage orders.');
         } else if (error.status === 404) {
-          this.loadError.set('No restaurant or orders were found for this account.');
+          this.loadError.set('No orders were found for this account.');
         } else {
           this.loadError.set('Unable to load orders right now.');
         }
 
-        this.orders.set([]);
+        if (mode === 'active') {
+          this.activeOrders.set([]);
+        } else {
+          this.historicOrders.set([]);
+        }
+
         this.selectedOrder.set(null);
 
         return EMPTY;
@@ -82,7 +124,11 @@ export class EditOrder implements OnInit {
         this.isLoading.set(false);
       }),
     ).subscribe(orders => {
-      this.orders.set(orders);
+      if (mode === 'active') {
+        this.activeOrders.set(orders);
+      } else {
+        this.historicOrders.set(orders);
+      }
 
       if (orders.length > 0) {
         this.selectOrder(orders[0]);
@@ -95,60 +141,113 @@ export class EditOrder implements OnInit {
     });
   }
 
-saveOrder(): Promise<null | { kind: 'serverError'; message: string }> {
-  const selectedOrder = this.selectedOrder();
+  saveOrder(): Promise<null | { kind: 'serverError'; message: string }> {
+    const selectedOrder = this.selectedOrder();
 
-  if (!selectedOrder) {
-    return Promise.resolve(null);
+    if (!selectedOrder || this.isSelectedOrderHistoric()) {
+      return Promise.resolve(null);
+    }
+
+    const nextAllowed = this.getNextAllowedStatuses(selectedOrder);
+    const targetStatus = this.orderModel().status;
+
+    if (targetStatus === selectedOrder.status || !nextAllowed.includes(targetStatus)) {
+      const message = 'Please select a valid next status for this order.';
+      this.saveError.set(message);
+      return Promise.resolve({ kind: 'serverError', message });
+    }
+
+    this.saveError.set(null);
+    this.saveSuccess.set(null);
+
+    return firstValueFrom(
+      this.orderApiService.updateOrderStatus(selectedOrder.id, {
+        status: targetStatus,
+      } satisfies UpdateOrderStatusRequest).pipe(
+        tap(updated => {
+          this.selectedOrder.set(updated);
+
+          if (updated.status === OrderStatus.Delivered || updated.status === OrderStatus.Cancelled) {
+            this.activeOrders.set(this.activeOrders().filter(order => order.id !== updated.id));
+            this.historicOrders.set([updated, ...this.historicOrders()]);
+            this.selectedOrder.set(null);
+            this.orderModel.set({ status: OrderStatus.Pending });
+          } else {
+            this.activeOrders.set(
+              this.activeOrders().map(order => (order.id === updated.id ? updated : order))
+            );
+            this.orderModel.set({
+              status: this.getNextAllowedStatuses(updated)[0] ?? updated.status,
+            });
+          }
+
+          this.saveSuccess.set('Order updated successfully.');
+        }),
+
+        map(() => null),
+
+        catchError((error: HttpErrorResponse) => {
+          const backendMessage = typeof error.error?.message === 'string'
+            ? error.error.message
+            : null;
+          const message = backendMessage ?? 'Unable to update the order right now.';
+          this.saveError.set(message);
+
+          return of({
+            kind: 'serverError' as const,
+            message,
+          });
+        }),
+      ),
+    );
   }
 
-  this.saveError.set(null);
-  this.saveSuccess.set(null);
+  selectOrder(order: OrderDto): void {
+    const currentOrder = this.selectedOrder();
 
-  return firstValueFrom(
-    this.orderApiService.updateOrderStatus(selectedOrder.id, {
-      status: this.orderModel().status,
-    } satisfies UpdateOrderStatusRequest).pipe(
-      tap(updated => {
-        this.selectedOrder.set(updated);
-        this.orders.set(
-          this.orders().map(order => (order.id === updated.id ? updated : order))
-        );
-        this.saveSuccess.set('Order updated successfully.');
-      }),
+    if (currentOrder?.id === order.id) {
+      this.selectedOrder.set(null);
+      this.orderModel.set({
+        status: OrderStatus.Pending,
+      });
+    } else {
+      this.selectedOrder.set(order);
+      this.orderModel.set({
+        status: this.getNextAllowedStatuses(order)[0] ?? order.status,
+      });
+    }
 
-      map(() => null),
-
-      catchError(() => {
-        const message = 'Unable to update the order right now.';
-        this.saveError.set(message);
-
-        return of({
-          kind: 'serverError' as const,
-          message,
-        });
-      }),
-    ),
-  );
-}
-
-selectOrder(order: OrderDto): void {
-  const currentOrder = this.selectedOrder();
-
-  if (currentOrder?.id === order.id) {
-    this.selectedOrder.set(null);
-    this.orderModel.set({
-      status: OrderStatus.Pending,
-    });
-  } else {
-    this.selectedOrder.set(order);
-    this.orderModel.set({
-      status: order.status as OrderStatus,
-    });
+    this.saveError.set(null);
+    this.saveSuccess.set(null);
   }
 
-  this.saveError.set(null);
-  this.saveSuccess.set(null);
-}
+  private getNextAllowedStatuses(order: OrderDto): OrderStatus[] {
+    if (order.status === OrderStatus.Delivered || order.status === OrderStatus.Cancelled) {
+      return [];
+    }
 
+    if (order.deliveryType === DeliveryType.Delivery) {
+      switch (order.status) {
+        case OrderStatus.Pending:
+          return [OrderStatus.Preparing, OrderStatus.Cancelled];
+        case OrderStatus.Preparing:
+          return [OrderStatus.OnTheWay, OrderStatus.Cancelled];
+        case OrderStatus.OnTheWay:
+          return [OrderStatus.Delivered, OrderStatus.Cancelled];
+        default:
+          return [];
+      }
+    }
+
+    switch (order.status) {
+      case OrderStatus.Pending:
+        return [OrderStatus.Preparing, OrderStatus.Cancelled];
+      case OrderStatus.Preparing:
+        return [OrderStatus.ReadyForPickup, OrderStatus.Cancelled];
+      case OrderStatus.ReadyForPickup:
+        return [OrderStatus.Delivered, OrderStatus.Cancelled];
+      default:
+        return [];
+    }
+  }
 }
