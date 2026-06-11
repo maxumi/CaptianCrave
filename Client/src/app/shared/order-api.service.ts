@@ -7,8 +7,8 @@ import { OrderStatus } from './models/status';
 
 
 export enum DeliveryType {
-  Delivery = 0,
-  Pickup = 1,
+  Delivery = 'delivery',
+  Pickup = 'pickup',
 }
 
 export interface CreateOrderItemRequest {
@@ -46,6 +46,7 @@ export interface OrderDto {
   userEmail: string;
   restaurantId: number;
   restaurantName: string;
+  deliveryType: DeliveryType;
   totalPrice: number;
   status: OrderStatus;
   createdAt: string;
@@ -67,9 +68,12 @@ export class OrderApiService {
     return this.http.post<OrderResponse>(this.ordersUrl, payload);
   }
 
-  // WIP
-  getOrdersByRestaurant(restaurantId: number): Observable<OrderDto[]> {
-    return this.http.get<OrderDto[]>(`${this.ordersUrl}/restaurant/${restaurantId}`);
+  getRestaurantActiveOrders(): Observable<OrderDto[]> {
+    return this.http.get<OrderDto[]>(`${this.ordersUrl}/restaurant/active`);
+  }
+
+  getRestaurantHistoricOrders(): Observable<OrderDto[]> {
+    return this.http.get<OrderDto[]>(`${this.ordersUrl}/restaurant/history`);
   }
 
   updateOrderStatus(
@@ -85,8 +89,8 @@ export class OrderApiService {
     return this.http.get<OrderDto>(`${this.ordersUrl}/${orderId}`);
   }
 
-  getActiveOrder(): Observable<OrderDto | null> {
-    return this.http.get<OrderDto>(`${this.ordersUrl}/active`).pipe(
+  getCustomerActiveOrder(): Observable<OrderDto | null> {
+    return this.http.get<OrderDto>(`${this.ordersUrl}/customer/active`).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
           return of(null);
@@ -94,5 +98,14 @@ export class OrderApiService {
         return throwError(() => error);
       })
     );
+  }
+
+  // Backward-compatible alias used by existing components.
+  getActiveOrder(): Observable<OrderDto | null> {
+    return this.getCustomerActiveOrder();
+  }
+
+  getCustomerHistoricOrders(): Observable<OrderDto[]> {
+    return this.http.get<OrderDto[]>(`${this.ordersUrl}/customer/history`);
   }
 }

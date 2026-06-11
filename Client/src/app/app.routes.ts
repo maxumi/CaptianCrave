@@ -21,6 +21,7 @@ export const routes: Routes = [
   { path: 'register', component: Register, canActivate: [guestGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'cart', component: Cart, canActivate: [authGuard, roleGuard], data: { roles: ['Customer'] } },
+  { path: 'order-status', component: OrderStatusView, canActivate: [authGuard, roleGuard], data: { roles: ['Customer'] } },
   { path: "order-status/:id", component: OrderStatusView, canActivate: [authGuard, roleGuard], data: { roles: ['Customer'] } },
   { path: 'restaurant-create', component: RestaurantCreate, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant'] } },
   { path: 'restaurant-edit', component: RestaurantEdit, canActivate: [authGuard, roleGuard], data: { roles: ['Restaurant', 'Admin'] } },

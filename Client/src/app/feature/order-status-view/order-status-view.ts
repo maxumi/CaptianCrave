@@ -1,9 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { OrderApiService, OrderDto } from '../../shared/order-api.service';
+import { DeliveryType, OrderApiService, OrderDto } from '../../shared/order-api.service';
 import { MatIconModule } from '@angular/material/icon';
-import { switchMap } from 'rxjs/operators';
 import { OrderStatus } from '../../shared/models/status';
 
 interface OrderDetails extends OrderDto {}
@@ -22,28 +20,20 @@ interface OrderStep {
 })
 export class OrderStatusView implements OnInit {
   private readonly orderApiService = inject(OrderApiService);
-  private readonly route = inject(ActivatedRoute);
   readonly OrderStatus = OrderStatus;
+  readonly DeliveryType = DeliveryType;
 
 
   readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);
   readonly order = signal<OrderDetails | null>(null);
+  readonly noActiveOrder = signal(false);
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(
-      switchMap(params => {
-        const id = params.get('id');
-        if (!id) {
-          this.loadError.set('Order ID not found.');
-          this.isLoading.set(false);
-          throw new Error('Order ID not found');
-        }
-        return this.orderApiService.getOrderById(Number(id));
-      })
-    ).subscribe({
-      next: (order) => {
-        this.order.set(order);
+    this.orderApiService.getCustomerActiveOrder().subscribe({
+      next: (activeOrder) => {
+        this.order.set(activeOrder);
+        this.noActiveOrder.set(activeOrder === null);
         this.isLoading.set(false);
       },
       error: () => {
@@ -53,12 +43,25 @@ export class OrderStatusView implements OnInit {
     });
   }
 
-  readonly steps: OrderStep[] = [
-    { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
-    { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
-    { label: 'On the way', status: OrderStatus.OnTheWay, icon: 'two_wheeler' },
-    { label: 'Delivered', status: OrderStatus.Delivered, icon: 'home' },
-  ];
+  get steps(): OrderStep[] {
+    const isPickup = this.order()?.deliveryType === DeliveryType.Pickup;
+
+    if (isPickup) {
+      return [
+        { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
+        { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
+        { label: 'Ready for pickup', status: OrderStatus.ReadyForPickup, icon: 'store' },
+        { label: 'Completed', status: OrderStatus.Delivered, icon: 'task_alt' },
+      ];
+    }
+
+    return [
+      { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
+      { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
+      { label: 'On the way', status: OrderStatus.OnTheWay, icon: 'two_wheeler' },
+      { label: 'Delivered', status: OrderStatus.Delivered, icon: 'home' },
+    ];
+  }
 
   get currentStepIndex(): number {
     const currentOrder = this.order();
@@ -90,6 +93,8 @@ export class OrderStatusView implements OnInit {
         return 'Preparing';
       case OrderStatus.OnTheWay:
         return 'On the way';
+      case OrderStatus.ReadyForPickup:
+        return 'Ready for pickup';
       case OrderStatus.Delivered:
         return 'Delivered';
       case OrderStatus.Cancelled:
@@ -109,6 +114,8 @@ export class OrderStatusView implements OnInit {
         return 'Your food is being prepared.';
       case OrderStatus.OnTheWay:
         return 'Your order is on the way. Almost there!';
+      case OrderStatus.ReadyForPickup:
+        return 'Your order is ready for pickup at the restaurant.';
       case OrderStatus.Delivered:
         return 'Your order has been delivered.';
       case OrderStatus.Cancelled:

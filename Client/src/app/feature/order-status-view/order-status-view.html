@@ -3,6 +3,8 @@
     <p class="loading-text">Loading order status...</p>
   } @else if (loadError()) {
     <p class="error-text">{{ loadError() }}</p>
+  } @else if (noActiveOrder()) {
+    <p class="loading-text">You currently have no active order. Completed orders will appear in history later.</p>
   } @else if (order(); as order) {
     <div class="card order-status-card">
       <header class="order-header">
@@ -18,6 +20,8 @@
         <div class="current-status-icon">
           @if (order.status === OrderStatus.OnTheWay) {
             <mat-icon>two_wheeler</mat-icon>
+          } @else if (order.status === OrderStatus.ReadyForPickup) {
+            <mat-icon>store</mat-icon>
           } @else if (order.status === OrderStatus.Preparing) {
             <mat-icon>restaurant</mat-icon>
           } @else if (order.status === OrderStatus.Delivered) {

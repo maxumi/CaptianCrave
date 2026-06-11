@@ -29,9 +29,9 @@ export class Cart implements OnInit {
   readonly canCheckout = computed(() => this.authService.user()?.role === Role.Customer);
 
   ngOnInit(): void {
-    this.orderApiService.getActiveOrder().subscribe(order => {
+    this.orderApiService.getCustomerActiveOrder().subscribe(order => {
       if (order) {
-        this.router.navigate(['/order-status', order.id]);
+        this.router.navigate(['/order-status']);
       }
     });
   }
@@ -101,7 +101,7 @@ export class Cart implements OnInit {
       );
 
       this.cartService.clear();
-      this.router.navigate(['/order-status', order.id]);
+      this.router.navigate(['/order-status']);
     } catch (error) {
       const httpError = error as HttpErrorResponse;
       const backendMessage =

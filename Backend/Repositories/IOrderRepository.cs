@@ -15,8 +15,15 @@ public interface IOrderRepository
     // Updates the status and updated_at of an existing order. Returns false if not found.
     Task<bool> UpdateStatusAsync(int id, OrderStatus status);
 
-    Task<IEnumerable<Order>> GetByRestaurantAsync(int restaurantId);
+    // Returns active orders for a restaurant.
+    Task<IEnumerable<Order>> GetActiveByRestaurantAsync(int restaurantId);
+
+    // Returns delivered/cancelled orders for a restaurant.
+    Task<IEnumerable<Order>> GetHistoryByRestaurantAsync(int restaurantId);
 
     // Returns the first active order for a user, or null if none exist.
     Task<Order?> GetActiveOrderForUserAsync(int userId);
+
+    // Returns delivered/cancelled orders for a user.
+    Task<IEnumerable<Order>> GetHistoryForUserAsync(int userId);
 }
