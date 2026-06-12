@@ -91,66 +91,90 @@
       "loadFailed": "Unable to load restaurants right now."
     }
   },
-    "restaurantInfo": {
-      "menu": "Menu",
-      "addItem": "Add item",
-      "loading": "Loading menu...",
-      "empty": "No menu items found.",
-      "error": {
-        "missingRestaurantId": "Missing restaurant id.",
-        "loadFailed": "Unable to load menu right now.",
-        "customerOnly": "Only customer accounts can add items to cart.",
-        "singleRestaurantOnly": "You can only add items from one restaurant. Clear your cart first."
-      },
-      "message": {
-        "addedToCart": "{{name}} added to cart."
+  "restaurantInfo": {
+    "menu": "Menu",
+    "addItem": "Add item",
+    "loading": "Loading menu...",
+    "empty": "No menu items found.",
+    "saveDialog": {
+      "title": "Save menu item",
+      "message": "Do you want to save this menu item?",
+      "button": {
+        "no": "No",
+        "ok": "OK"
       }
     },
-    "menuEdit": {
-      "title": "Manage Menu",
-      "subtitle": "Add, edit or remove menu items from your restaurant",
-      "addNewItem": "+ Add New Item",
-      "searchLabel": "Search menu items",
-      "searchPlaceholder": "Search Menu Items",
-      "loading": "Loading menu items...",
-      "noRestaurant": "No restaurant profile found for your account yet.",
-      "view": "View",
-      "createItem": "Create Item",
-      "saveChanges": "Save Changes",
-      "deleteItem": "Delete menu item",
-      "saving": "Saving...",
-      "status": {
-        "inStock": "In Stock",
-        "outOfStock": "Out of Stock"
-      },
-      "table": {
-        "item": "Item",
-        "price": "Price",
-        "status": "Status",
-        "action": "Action"
-      },
-      "fields": {
-        "name": "Name",
-        "price": "Price",
-        "description": "Description",
-        "inStock": "In Stock"
-      },
-      "form": {
-        "addTitle": "Add New Menu Item",
-        "editTitle": "Edit {{name}}",
-        "addSubtitle": "Create a new menu item",
-        "editSubtitle": "Update menu item details"
-      },
-      "aria": {
-        "filters": "Menu filters",
-        "menuItems": "Menu items"
-      },
-      "error": {
-        "missingRestaurant": "Restaurant context is missing. Please refresh and try again.",
-        "loadFailed": "Failed to load menu items. Please try again.",
-        "saveFailed": "Could not save this menu item.",
-        "deleteFailed": "Could not delete this menu item."
+    "error": {
+      "missingRestaurantId": "Missing restaurant id.",
+      "loadFailed": "Unable to load menu right now.",
+      "customerOnly": "Only customer accounts can add items to cart.",
+      "singleRestaurantOnly": "You can only add items from one restaurant. Clear your cart first."
+    },
+    "message": {
+      "addedToCart": "{{name}} added to cart."
+    }
+  },
+  "menuEdit": {
+    "title": "Manage Menu",
+    "subtitle": "Add, edit or remove menu items from your restaurant",
+    "addNewItem": "+ Add New Item",
+    "searchLabel": "Search menu items",
+    "searchPlaceholder": "Search Menu Items",
+    "loading": "Loading menu items...",
+    "noRestaurant": "No restaurant profile found for your account yet.",
+    "view": "View",
+    "createItem": "Create Item",
+    "saveChanges": "Save Changes",
+    "deleteItem": "Delete menu item",
+    "saving": "Saving...",
+    "saveDialog": {
+      "title": "Save menu item",
+      "message": "Do you want to save this menu item?",
+      "button": {
+        "no": "No",
+        "ok": "OK"
       }
+    },
+    "deleteDialog": {
+      "title": "Delete menu item",
+      "message": "Do you want to delete this menu item?",
+      "button": {
+        "no": "No",
+        "ok": "OK"
+      }
+    },
+    "status": {
+      "inStock": "In Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "table": {
+      "item": "Item",
+      "price": "Price",
+      "status": "Status",
+      "action": "Action"
+    },
+    "fields": {
+      "name": "Name",
+      "price": "Price",
+      "description": "Description",
+      "inStock": "In Stock"
+    },
+    "form": {
+      "addTitle": "Add New Menu Item",
+      "editTitle": "Edit {{name}}",
+      "addSubtitle": "Create a new menu item",
+      "editSubtitle": "Update menu item details"
+    },
+    "aria": {
+      "filters": "Menu filters",
+      "menuItems": "Menu items"
+    },
+    "error": {
+      "missingRestaurant": "Restaurant context is missing. Please refresh and try again.",
+      "loadFailed": "Failed to load menu items. Please try again.",
+      "saveFailed": "Could not save this menu item.",
+      "deleteFailed": "Could not delete this menu item."
+    }
   },
 "cart": {
   "title": "Cart",
@@ -265,6 +289,53 @@
     "title": "Order summary",
     "quantity": "Qty",
     "total": "Total"
+  }
+},
+"orderManage": {
+  "title": "Manage Orders",
+  "subtitle": "View active orders by default and browse historic orders separately.",
+  "loading": "Loading orders...",
+  "empty": "No orders found.",
+  "mode": {
+    "active": "Active Orders",
+    "history": "Historic Orders"
+  },
+  "table": {
+    "order": "Order",
+    "customer": "Customer",
+    "total": "Total",
+    "type": "Type",
+    "status": "Status",
+    "action": "Action"
+  },
+  "button": {
+    "view": "View",
+    "saveChanges": "Save Changes"
+  },
+  "details": {
+    "orderNumber": "Order #{{id}}",
+    "historicReadonly": "This is a historic order and cannot be edited."
+  },
+  "label": {
+    "customer": "Customer",
+    "status": "Status",
+    "total": "Total"
+  },
+  "items": {
+    "title": "Items"
+  },
+  "aria": {
+    "orders": "Restaurant orders"
+  },
+  "success": {
+    "updated": "Order updated successfully."
+  },
+  "error": {
+    "notAllowed": "You are not allowed to manage orders.",
+    "notFound": "No orders were found for this account.",
+    "loadFailed": "Unable to load orders right now.",
+    "invalidNextStatus": "Please select a valid next status for this order.",
+    "updateFailed": "Unable to update the order right now."
   }
 }
 }
