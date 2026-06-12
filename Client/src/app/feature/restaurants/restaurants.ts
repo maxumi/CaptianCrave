@@ -20,30 +20,56 @@ export class Restaurants implements OnInit {
   readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);
 
-  ngOnInit(): void {
-    const user = this.authService.user();
-    if (!user) {
-      this.loadError.set('User not authenticated.');
-      this.isLoading.set(false);
-      return;
-    }
-    if (user.latitude == null || user.longitude == null) {
-      this.loadError.set('User location not available. Please update your profile with a valid address.');
-      this.isLoading.set(false);
-      return;
-    }
-    else {
-    this.restaurantApiService.getNearbyRestaurants(user.latitude, user?.longitude, MAX_DISTANCE_KM).subscribe({
-      next: (restaurants) => {
-        this.restaurants.set(restaurants);
-        this.isLoading.set(false);
+ngOnInit(): void {
+  const user = this.authService.user();
+
+  if (!user) {
+    this.loadError.set('User not authenticated.');
+    this.isLoading.set(false);
+    return;
+  }
+
+  if (user.role.toLowerCase() === 'restaurant') {
+    this.restaurantApiService.getMyRestaurant().subscribe({
+      next: (restaurant) => {
+        if (restaurant.latitude == null || restaurant.longitude == null) {
+          this.loadError.set('Restaurant location not available.');
+          this.isLoading.set(false);
+          return;
+        }
+
+        this.loadNearbyRestaurants(restaurant.latitude, restaurant.longitude);
       },
       error: () => {
-        this.loadError.set('Unable to load restaurants right now.');
+        this.loadError.set('Unable to load restaurant location.');
         this.isLoading.set(false);
       },
     });
-    }
+
+    return;
   }
+
+  if (user.latitude == null || user.longitude == null) {
+    this.loadError.set('User location not available. Please update your profile with a valid address.');
+    this.isLoading.set(false);
+    return;
+  }
+
+  this.loadNearbyRestaurants(user.latitude, user.longitude);
+}
+
+
+private loadNearbyRestaurants(latitude: number, longitude: number): void {
+  this.restaurantApiService.getNearbyRestaurants(latitude, longitude, MAX_DISTANCE_KM).subscribe({
+    next: (restaurants) => {
+      this.restaurants.set(restaurants);
+      this.isLoading.set(false);
+    },
+    error: () => {
+      this.loadError.set('Unable to load restaurants right now.');
+      this.isLoading.set(false);
+    },
+  });
+}
 
 }
