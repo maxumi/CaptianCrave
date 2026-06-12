@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import * as L from 'leaflet';
 import { LocationResult, LocationService } from '../../shared/LocationService';
@@ -7,13 +8,10 @@ import { AuthService } from '../../core/auth/auth.service';
 import { RestaurantApiService, RestaurantDto } from '../../shared/restaurant-api.service';
 import { UserApiService } from '../../shared/user-api.service';
 
-/**
- * WIP: This component is still under development and may contain incomplete features or placeholder code.
- */
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslocoModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -22,6 +20,7 @@ export class Profile implements OnInit, AfterViewInit {
   private readonly userApiService = inject(UserApiService);
   private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly authService = inject(AuthService);
+  private readonly transloco = inject(TranslocoService);
 
   readonly name = signal('');
   readonly address = signal('');
@@ -110,7 +109,7 @@ export class Profile implements OnInit, AfterViewInit {
     this.saveSuccess.set(null);
 
     if (!trimmedAddress) {
-      this.saveError.set('Address is required.');
+      this.saveError.set(this.t('profile.error.addressRequired'));
       return;
     }
 
@@ -120,7 +119,7 @@ export class Profile implements OnInit, AfterViewInit {
       );
 
       if (!location) {
-        this.saveError.set('No address found for the entered value.');
+        this.saveError.set(this.t('profile.error.addressNotFound'));
         return;
       }
 
@@ -152,17 +151,14 @@ export class Profile implements OnInit, AfterViewInit {
         updated.address || location.label
       );
 
-      this.saveSuccess.set('Profile address updated.');
+      this.saveSuccess.set(this.t('profile.success.addressUpdated'));
     } catch (error) {
       console.error('Error saving profile address:', error);
-      this.saveError.set('Unable to save address right now.');
+      this.saveError.set(this.t('profile.error.saveFailed'));
     }
   }
 
-  private updateLocation(
-    location: LocationResult,
-    popupText: string
-  ): void {
+  private updateLocation(location: LocationResult, popupText: string): void {
     const latLng: L.LatLngExpression = [location.lat, location.lng];
 
     this.marker.setLatLng(latLng);
@@ -207,5 +203,9 @@ export class Profile implements OnInit, AfterViewInit {
     });
 
     this.restaurantMarkers = [];
+  }
+
+  private t(key: string): string {
+    return this.transloco.translate(key);
   }
 }

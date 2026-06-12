@@ -77,14 +77,34 @@
   "restaurants": {
     "title": "Restaurants near you",
     "subtitle": " ",
+    "loading": "Loading restaurants...",
+    "empty": "No restaurants found.",
     "status": {
       "open": "Open",
       "closed": "Closed"
+    },
+    "error": {
+      "notAuthenticated": "User not authenticated.",
+      "restaurantLocationMissing": "Restaurant location not available.",
+      "restaurantLocationFailed": "Unable to load restaurant location.",
+      "userLocationMissing": "User location not available. Please update your profile with a valid address.",
+      "loadFailed": "Unable to load restaurants right now."
     }
   },
     "restaurantInfo": {
-    "menu": "Menu",
-    "addItem": "Add item"
+      "menu": "Menu",
+      "addItem": "Add item",
+      "loading": "Loading menu...",
+      "empty": "No menu items found.",
+      "error": {
+        "missingRestaurantId": "Missing restaurant id.",
+        "loadFailed": "Unable to load menu right now.",
+        "customerOnly": "Only customer accounts can add items to cart.",
+        "singleRestaurantOnly": "You can only add items from one restaurant. Clear your cart first."
+      },
+      "message": {
+        "addedToCart": "{{name}} added to cart."
+      }
     },
     "menuEdit": {
       "title": "Manage Menu",
@@ -131,5 +151,120 @@
         "saveFailed": "Could not save this menu item.",
         "deleteFailed": "Could not delete this menu item."
       }
+  },
+"cart": {
+  "title": "Cart",
+  "amount": "Amount",
+  "remove": "Remove",
+  "orderType": "Order type",
+  "delivery": "Delivery",
+  "pickup": "Pickup",
+  "total": "Total",
+  "clearCart": "Clear cart",
+  "checkout": "Checkout",
+  "placingOrder": "Placing order...",
+  "empty": "Your cart is empty.",
+  "error": {
+    "notLoggedIn": "You must be logged in to place an order.",
+    "customerOnly": "Only customer accounts can place orders.",
+    "empty": "Your cart is empty.",
+    "addressRequired": "Please update your profile address before checkout.",
+    "checkoutFailed": "Unable to place order right now."
   }
+},
+"restaurantCreate": {
+  "title": "Create restaurant",
+  "label": {
+    "restaurantName": "Restaurant name",
+    "description": "Description",
+    "address": "Address",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },
+  "placeholder": {
+    "restaurantName": "Enter restaurant name",
+    "description": "Enter restaurant description",
+    "address": "Enter restaurant address"
+  },
+  "button": {
+    "setLocation": "Set location",
+    "create": "Create restaurant",
+    "creating": "Creating..."
+  },
+  "validation": {
+    "restaurantNameRequired": "Restaurant name is required",
+    "addressRequired": "Address is required",
+    "latitudeRequired": "Latitude is required",
+    "longitudeRequired": "Longitude is required",
+    "addressLookupError": "Could not find that address.",
+    "userRequired": "You must be logged in to create a restaurant.",
+    "serverError": "Could not create restaurant right now."
+  }
+},
+"profile": {
+  "title": "Profile",
+  "name": "Name",
+  "address": "Address",
+  "changeAddress": "Change address",
+  "saveAddress": "Save address",
+  "placeholder": {
+    "address": "Enter new address"
+  },
+  "success": {
+    "addressUpdated": "Profile address updated."
+  },
+  "error": {
+    "addressRequired": "Address is required.",
+    "addressNotFound": "No address found for the entered value.",
+    "saveFailed": "Unable to save address right now."
+  }
+},
+"home": {
+  "title": "Captain Crave",
+  "subtitle": "Simple food discovery app for browsing restaurants and checking details.",
+  "signedInAs": "Signed in as {{name}}",
+  "viewRestaurants": "View restaurants",
+  "login": "Login",
+  "register": "Register"
+},
+"orderStatus": {
+  "loading": "Loading order status...",
+  "noActiveOrder": "You currently have no active order. Completed orders will appear in history later.",
+  "title": "Order status",
+  "orderNumber": "Order #CCID{{id}}",
+  "progressAria": "Order progress",
+  "error": {
+    "loadFailed": "Failed to load order details."
+  },
+  "step": {
+    "placed": "Placed",
+    "preparing": "Preparing",
+    "readyForPickup": "Ready for pickup",
+    "completed": "Completed",
+    "onTheWay": "On the way",
+    "delivered": "Delivered"
+  },
+  "status": {
+    "pending": "Pending",
+    "preparing": "Preparing",
+    "onTheWay": "On the way",
+    "readyForPickup": "Ready for pickup",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "message": {
+    "pending": "Your order has been placed and is waiting for the restaurant.",
+    "preparing": "Your food is being prepared.",
+    "onTheWay": "Your order is on the way. Almost there!",
+    "readyForPickup": "Your order is ready for pickup at the restaurant.",
+    "delivered": "Your order has been delivered.",
+    "cancelled": "Your order was cancelled.",
+    "waiting": "Waiting for order status."
+  },
+  "summary": {
+    "title": "Order summary",
+    "quantity": "Qty",
+    "total": "Total"
+  }
+}
 }

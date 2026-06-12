@@ -1,18 +1,27 @@
-<section class="home-page">
+<section class="home-page" *transloco="let t">
   <div class="home-card card">
-    <h1>Captain Crave</h1>
-    <p>Simple food discovery app for browsing restaurants and checking details.</p>
+    <h1>{{ t('home.title') }}</h1>
+    <p>{{ t('home.subtitle') }}</p>
 
     @if (authService.user(); as user) {
-      <p class="signed-in">Signed in as {{ user.name }}</p>
+      <p class="signed-in">
+        {{ t('home.signedInAs', { name: user.name }) }}
+      </p>
 
       <div class="home-actions">
-        <a class="btn" routerLink="/restaurants">View restaurants</a>
+        <a class="btn" routerLink="/restaurants">
+          {{ t('home.viewRestaurants') }}
+        </a>
       </div>
     } @else {
       <div class="home-actions">
-        <a class="btn" routerLink="/login">Login</a>
-        <a class="btn" routerLink="/register">Register</a>
+        <a class="btn" routerLink="/login">
+          {{ t('home.login') }}
+        </a>
+
+        <a class="btn" routerLink="/register">
+          {{ t('home.register') }}
+        </a>
       </div>
     }
   </div>

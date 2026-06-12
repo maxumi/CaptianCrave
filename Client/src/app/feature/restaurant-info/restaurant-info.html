@@ -1,12 +1,12 @@
 <div class="restaurant-info-page" *transloco="let t">
   <div class="restaurant-banner">
-    <img src="captain_crave_banner.png" alt="Burger Palace" />
+    <img src="captain_crave_banner.png" alt="Captain Crave" />
   </div>
 
   <h2>{{ t('restaurantInfo.menu') }}</h2>
 
   @if (isLoading()) {
-    <p class="menu-state">Loading menu...</p>
+    <p class="menu-state">{{ t('restaurantInfo.loading') }}</p>
   }
 
   @if (loadError()) {
@@ -15,7 +15,9 @@
 
   @if (!isLoading() && !loadError()) {
     @if (!canAddToCart()) {
-      <p class="menu-state menu-state-error">Only customer accounts can add items to cart.</p>
+      <p class="menu-state menu-state-error">
+        {{ t('restaurantInfo.error.customerOnly') }}
+      </p>
     }
 
     @if (addMessage()) {
@@ -29,6 +31,7 @@
             <h3>{{ item.name }}</h3>
             <p class="price">kr. {{ item.price }}</p>
             <p class="description">{{ item.description }}</p>
+
             <button
               class="btn add-btn"
               type="button"
@@ -47,6 +50,6 @@
   }
 
   @if (!isLoading() && !loadError() && !menuItems().length) {
-    <p class="menu-state">No menu items found.</p>
+    <p class="menu-state">{{ t('restaurantInfo.empty') }}</p>
   }
 </div>

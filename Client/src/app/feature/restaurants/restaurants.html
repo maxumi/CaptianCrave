@@ -5,7 +5,7 @@
   </div>
 
   @if (isLoading()) {
-    <p class="restaurants-state">Loading restaurants...</p>
+    <p class="restaurants-state">{{ t('restaurants.loading') }}</p>
   }
 
   @if (loadError()) {
@@ -23,25 +23,25 @@
           [queryParams]="{ restaurantId: restaurant.id }"
         >
           <div class="restaurant-card card">
-          <img
-            src='captain_crave.png'
-            [alt]="restaurant.name"
-          />
+            <img
+              src="captain_crave.png"
+              [alt]="restaurant.name"
+            />
 
-          <div class="restaurant-card-content">
-            <h2>{{ restaurant.name }}</h2>
-            <p>{{ restaurant.description || restaurant.address }}</p>
-            <span
-              class="restaurant-status status"
-              [class.out]="!restaurant.isActive"
-            >
-              {{
-                restaurant.isActive
-                  ? t('restaurants.status.open')
-                  : t('restaurants.status.closed')
-              }}
-            </span>
-          </div>
+            <div class="restaurant-card-content">
+              <h2>{{ restaurant.name }}</h2>
+              <p>{{ restaurant.description || restaurant.address }}</p>
+              <span
+                class="restaurant-status status"
+                [class.out]="!restaurant.isActive"
+              >
+                {{
+                  restaurant.isActive
+                    ? t('restaurants.status.open')
+                    : t('restaurants.status.closed')
+                }}
+              </span>
+            </div>
           </div>
         </a>
       }
@@ -50,7 +50,7 @@
 
   @if (!isLoading() && !loadError() && !restaurants().length) {
     <p class="restaurants-state">
-      No restaurants found.
+      {{ t('restaurants.empty') }}
     </p>
   }
 </div>

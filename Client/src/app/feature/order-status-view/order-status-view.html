@@ -1,16 +1,19 @@
-<div class="order-status-page">
+<div class="order-status-page" *transloco="let t">
   @if (isLoading()) {
-    <p class="loading-text">Loading order status...</p>
+    <p class="loading-text">{{ t('orderStatus.loading') }}</p>
   } @else if (loadError()) {
     <p class="error-text">{{ loadError() }}</p>
   } @else if (noActiveOrder()) {
-    <p class="loading-text">You currently have no active order. Completed orders will appear in history later.</p>
+    <p class="loading-text">{{ t('orderStatus.noActiveOrder') }}</p>
   } @else if (order(); as order) {
     <div class="card order-status-card">
       <header class="order-header">
-        <h1>Order status</h1>
+        <h1>{{ t('orderStatus.title') }}</h1>
 
-        <p class="order-number">Order #CCID{{ order.id }}</p>
+        <p class="order-number">
+          {{ t('orderStatus.orderNumber', { id: order.id }) }}
+        </p>
+
         <p class="order-date">
           {{ order.createdAt | date: 'MMMM d, y - h:mm a' }}
         </p>
@@ -34,13 +37,10 @@
         <div>
           <h2>{{ statusTitle }}</h2>
           <p>{{ statusMessage }}</p>
-
-          @if (order.status !== OrderStatus.Delivered && order.status !== OrderStatus.Cancelled) {
-          }
         </div>
       </div>
 
-      <div class="timeline" aria-label="Order progress">
+      <div class="timeline" [attr.aria-label]="t('orderStatus.progressAria')">
         @for (step of steps; track step.label; let index = $index) {
           <div
             class="timeline-step"
@@ -58,29 +58,32 @@
           </div>
         }
       </div>
-<div class="order-summary">
-  <h3>Order summary</h3>
 
-  <div class="order-items">
-    @for (item of order.items; track item.menuItemName) {
-      <div class="order-item">
-        <div>
-          <p class="item-name">{{ item.menuItemName }}</p>
-          <p class="item-quantity">Qty: {{ item.quantity }}</p>
+      <div class="order-summary">
+        <h3>{{ t('orderStatus.summary.title') }}</h3>
+
+        <div class="order-items">
+          @for (item of order.items; track item.menuItemName) {
+            <div class="order-item">
+              <div>
+                <p class="item-name">{{ item.menuItemName }}</p>
+                <p class="item-quantity">
+                  {{ t('orderStatus.summary.quantity') }}: {{ item.quantity }}
+                </p>
+              </div>
+
+              <p class="item-price">
+                {{ item.price * item.quantity | number: '1.2-2' }} kr.
+              </p>
+            </div>
+          }
         </div>
 
-        <p class="item-price">
-          {{ item.price * item.quantity | number: '1.2-2' }} kr.
-        </p>
+        <div class="order-total">
+          <span>{{ t('orderStatus.summary.total') }}</span>
+          <strong>{{ order.totalPrice | number: '1.2-2' }} kr.</strong>
+        </div>
       </div>
-    }
-  </div>
-
-  <div class="order-total">
-    <span>Total</span>
-    <strong>{{ order.totalPrice | number: '1.2-2' }} kr.</strong>
-  </div>
-</div>
     </div>
   }
 </div>
