@@ -18,13 +18,10 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
   box-sizing: border-box;
 
-  display: grid;
-  grid-template-columns: max-content minmax(220px, 340px) max-content;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  gap: 16px;
 }
-
 .brand {
   display: flex;
   align-items: center;
@@ -90,6 +87,7 @@
 }
 
 .auth-buttons {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;
