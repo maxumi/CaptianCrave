@@ -8,8 +8,12 @@ using System.Security.Claims;
 
 namespace Backend.Tests.Controllers;
 
+// Unit tests for MenuItemsController.
+// IMenuItemService and IRestaurantService are mocked so no database access occurs.
+// A blank ClaimsPrincipal is supplied so User.IsInRole does not throw inside the controller.
 public class MenuItemControllerTests
 {
+    // Creates a MenuItemsController with mocked services and an unauthenticated HttpContext.
     private static (MenuItemsController controller, Mock<IMenuItemService> mockService) CreateController()
     {
         var mockService = new Mock<IMenuItemService>();
@@ -25,6 +29,7 @@ public class MenuItemControllerTests
 
     // Create
 
+    // Valid DTO returns 201 Created.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreated()
     {
@@ -38,6 +43,7 @@ public class MenuItemControllerTests
         Assert.IsType<CreatedResult>(result);
     }
 
+    // Response body contains the newly created menu item.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedMenuItem()
     {
@@ -51,6 +57,7 @@ public class MenuItemControllerTests
         Assert.Equal(created, result?.Value);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Create_InvalidModelState_ReturnsBadRequest()
     {
