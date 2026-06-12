@@ -2,17 +2,30 @@
 using Backend.DTOs;
 using Backend.Models.Enums;
 using Backend.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace Backend.Tests.Controllers;
 
 public class OrderControllerTests
 {
-    private static (OrdersController controller, Mock<IOrderService> mockService) CreateController()
+    private static (OrdersController controller, Mock<IOrderService> mockService) CreateController(
+        int userId = 99, UserRole role = UserRole.Restaurant)
     {
         var mockService = new Mock<IOrderService>();
         var controller = new OrdersController(mockService.Object);
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Role, role.ToString())
+        };
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
         return (controller, mockService);
     }
 
@@ -191,23 +204,24 @@ public class OrderControllerTests
     // UpdateStatus
 
     [Fact]
-    public async Task UpdateStatus_ExistingOrder_ReturnsNoContent()
+    public async Task UpdateStatus_ExistingOrder_ReturnsOk()
     {
         var (controller, mockService) = CreateController();
-        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
-        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Preparing };
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(true);
+        mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(MakeOrderDto());
 
         var result = await controller.UpdateStatus(1, dto);
 
-        Assert.IsType<NoContentResult>(result);
+        Assert.IsType<OkObjectResult>(result);
     }
 
     [Fact]
     public async Task UpdateStatus_NonExistingOrder_ReturnsNotFound()
     {
         var (controller, mockService) = CreateController();
-        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
-        mockService.Setup(s => s.UpdateStatusAsync(99, dto)).ReturnsAsync(false);
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Preparing };
+        mockService.Setup(s => s.UpdateStatusAsync(99, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(false);
 
         var result = await controller.UpdateStatus(99, dto);
 
@@ -226,20 +240,21 @@ public class OrderControllerTests
     }
 
     [Theory]
-    [InlineData(OrderStatus.Confirmed)]
     [InlineData(OrderStatus.Preparing)]
-    [InlineData(OrderStatus.Ready)]
+    [InlineData(OrderStatus.OnTheWay)]
+    [InlineData(OrderStatus.ReadyForPickup)]
     [InlineData(OrderStatus.Delivered)]
     [InlineData(OrderStatus.Cancelled)]
-    public async Task UpdateStatus_EachValidStatus_ReturnsNoContent(OrderStatus status)
+    public async Task UpdateStatus_EachValidStatus_ReturnsOk(OrderStatus status)
     {
         var (controller, mockService) = CreateController();
         var dto = new UpdateOrderStatusDto { Status = status };
-        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(true);
+        mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(MakeOrderDto());
 
         var result = await controller.UpdateStatus(1, dto);
 
-        Assert.IsType<NoContentResult>(result);
+        Assert.IsType<OkObjectResult>(result);
     }
 }
 

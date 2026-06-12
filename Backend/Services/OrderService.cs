@@ -67,6 +67,7 @@ public class OrderService(
         return created.ToDto();
     }
 
+    // Resolves the restaurant owned by the caller and returns its non-terminal orders.
     public async Task<IEnumerable<OrderDto>> GetRestaurantActiveOrdersAsync(int currentUserId, UserRole currentUserRole)
     {
         var restaurantId = await ResolveRestaurantIdForUserAsync(currentUserId, currentUserRole);
@@ -74,6 +75,7 @@ public class OrderService(
         return orders.Select(order => order.ToDto());
     }
 
+    // Resolves the restaurant owned by the caller and returns its terminal (Delivered/Cancelled) orders.
     public async Task<IEnumerable<OrderDto>> GetRestaurantHistoricOrdersAsync(int currentUserId, UserRole currentUserRole)
     {
         var restaurantId = await ResolveRestaurantIdForUserAsync(currentUserId, currentUserRole);
@@ -113,15 +115,15 @@ public class OrderService(
         return order?.ToDto();
     }
 
+    // Returns all terminal (Delivered/Cancelled) orders for a user, most recently created first.
     public async Task<IEnumerable<OrderDto>> GetHistoricOrdersForUserAsync(int userId)
     {
         var orders = await _orderRepository.GetHistoryForUserAsync(userId);
         return orders.Select(order => order.ToDto());
     }
 
-    /// <summary>
-    /// Finds the restaurant linked to the current user and returns its ID.
-    /// </summary>
+    // Looks up the restaurant owned by the current user and returns its ID.
+    // Throws if the user is Admin (wrong method) or has no restaurant profile.
     private async Task<int> ResolveRestaurantIdForUserAsync(int currentUserId, UserRole currentUserRole)
     {
         if (currentUserRole == UserRole.Admin)
@@ -133,6 +135,7 @@ public class OrderService(
         return restaurant.Id;
     }
 
+    // Returns true if an order has reached a final state (Delivered or Cancelled) that cannot be changed.
     private static bool IsTerminal(OrderStatus status) =>
         status == OrderStatus.Delivered || status == OrderStatus.Cancelled;
 
@@ -143,15 +146,15 @@ public class OrderService(
     // Orders can be cancelled unless they have already been delivered.
     private static bool IsValidTransition(DeliveryType deliveryType, OrderStatus currentStatus, OrderStatus nextStatus)
     {
-        // Prevent updating an order to the same status.
+        // Reject no-op transitions — the status must actually change.
         if (currentStatus == nextStatus)
             return false;
 
-        // Allow cancellation from any status except Delivered.
+        // Cancellation is always allowed unless the order has already been delivered.
         if (nextStatus == OrderStatus.Cancelled)
             return currentStatus != OrderStatus.Delivered;
 
-        // Switch expression
+        // Enforce the linear delivery-type-specific progression:
         return deliveryType switch
         {
             DeliveryType.Delivery => currentStatus switch

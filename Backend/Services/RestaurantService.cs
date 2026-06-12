@@ -16,7 +16,7 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
         return restaurants.Select(r => r.ToDto());
     }
 
-    // Retrieves nearby restaurants within a specified radius.
+    // Loads all restaurants and filters in-memory to those within radiusKm using the Haversine formula.
     public async Task<IEnumerable<RestaurantDto>> GetNearbyRestaurantsAsync(
         double latitude,
         double longitude,
@@ -56,7 +56,7 @@ public class RestaurantService(IRestaurantRepository restaurantRepository) : IRe
         return created.ToDto();
     }
 
-    // Calculates the distance between two geographic points using the Haversine formula.
+    // Returns the great-circle distance in kilometres between two lat/lng points (Haversine formula, Earth radius = 6371 km).
     private static double GetDistance(
         double lat1,
         double lon1,
