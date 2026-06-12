@@ -1,23 +1,36 @@
 ﻿using Backend.Controllers;
 using Backend.DTOs;
 using Backend.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace Backend.Tests.Controllers;
 
+// Unit tests for RestaurantsController.
+// IRestaurantService and IMenuItemService are mocked so no database access occurs.
 public class RestaurantControllerTests
 {
+    // Creates a RestaurantsController with mocked IRestaurantService and IMenuItemService.
+    // Supplies an authenticated HttpContext so User claims resolve inside the controller.
     private static (RestaurantsController controller, Mock<IRestaurantService> mockService, Mock<IMenuItemService> mockMenuItemService) CreateController()
     {
         var mockService = new Mock<IRestaurantService>();
         var mockMenuItemService = new Mock<IMenuItemService>();
         var controller = new RestaurantsController(mockService.Object, mockMenuItemService.Object);
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "1") };
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
         return (controller, mockService, mockMenuItemService);
     }
 
     // GetAll
 
+    // Returns 200 OK for the restaurant listing.
     [Fact]
     public async Task GetAll_ReturnsOk()
     {
@@ -29,6 +42,7 @@ public class RestaurantControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the full restaurant list.
     [Fact]
     public async Task GetAll_ReturnsRestaurantList()
     {
@@ -47,6 +61,7 @@ public class RestaurantControllerTests
 
     // GetById
 
+    // Returns 200 OK when the restaurant exists.
     [Fact]
     public async Task GetById_ExistingId_ReturnsOk()
     {
@@ -59,6 +74,7 @@ public class RestaurantControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the matching restaurant DTO.
     [Fact]
     public async Task GetById_ExistingId_ReturnsRestaurant()
     {
@@ -71,6 +87,7 @@ public class RestaurantControllerTests
         Assert.Equal(restaurant, result?.Value);
     }
 
+    // Returns 404 Not Found when no restaurant matches the given ID.
     [Fact]
     public async Task GetById_NonExistingId_ReturnsNotFound()
     {
@@ -84,6 +101,7 @@ public class RestaurantControllerTests
 
     // Create
 
+    // Valid DTO returns 201 CreatedAtAction pointing to GetById.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedAtAction()
     {
@@ -97,6 +115,7 @@ public class RestaurantControllerTests
         Assert.IsType<CreatedAtActionResult>(result);
     }
 
+    // Response body contains the newly created restaurant.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedRestaurant()
     {
@@ -110,6 +129,7 @@ public class RestaurantControllerTests
         Assert.Equal(created, result?.Value);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Create_InvalidModelState_ReturnsBadRequest()
     {
@@ -123,6 +143,7 @@ public class RestaurantControllerTests
 
     // GetMenuItems
 
+    // Returns 200 OK for a valid restaurant ID.
     [Fact]
     public async Task GetMenuItems_ReturnsOk()
     {
@@ -134,6 +155,7 @@ public class RestaurantControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the full menu item list for the restaurant.
     [Fact]
     public async Task GetMenuItems_ReturnsItems()
     {
@@ -150,6 +172,7 @@ public class RestaurantControllerTests
         Assert.Equal(items, result?.Value);
     }
 
+    // Returns 200 OK with an empty collection when the restaurant has no menu items.
     [Fact]
     public async Task GetMenuItems_EmptyList_ReturnsOkWithEmptyCollection()
     {

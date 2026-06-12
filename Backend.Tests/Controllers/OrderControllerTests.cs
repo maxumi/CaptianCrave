@@ -2,17 +2,35 @@
 using Backend.DTOs;
 using Backend.Models.Enums;
 using Backend.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 
 namespace Backend.Tests.Controllers;
 
+// Unit tests for OrdersController.
+// IOrderService is mocked so no database, validation, or business logic runs.
+// CreateController supplies a ClaimsPrincipal with Restaurant role so User.GetId()
+// and User.GetRole() resolve without throwing inside the controller.
 public class OrderControllerTests
 {
-    private static (OrdersController controller, Mock<IOrderService> mockService) CreateController()
+    // Creates an OrdersController with a mocked IOrderService and a pre-authenticated user.
+    private static (OrdersController controller, Mock<IOrderService> mockService) CreateController(
+        int userId = 99, UserRole role = UserRole.Restaurant)
     {
         var mockService = new Mock<IOrderService>();
         var controller = new OrdersController(mockService.Object);
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Role, role.ToString())
+        };
+        var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
         return (controller, mockService);
     }
 
@@ -52,6 +70,7 @@ public class OrderControllerTests
 
     // GetById
 
+    // Returns 200 OK when the order exists.
     [Fact]
     public async Task GetById_ExistingId_ReturnsOk()
     {
@@ -63,6 +82,7 @@ public class OrderControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the matching order DTO.
     [Fact]
     public async Task GetById_ExistingId_ReturnsOrderDto()
     {
@@ -75,6 +95,7 @@ public class OrderControllerTests
         Assert.Equal(dto, result?.Value);
     }
 
+    // Order DTO status field reflects the current order status.
     [Fact]
     public async Task GetById_ExistingId_ReturnsCorrectStatus()
     {
@@ -87,6 +108,7 @@ public class OrderControllerTests
         Assert.Equal(OrderStatus.Pending, order?.Status);
     }
 
+    // Returns 404 Not Found when no order matches the given ID.
     [Fact]
     public async Task GetById_NonExistingId_ReturnsNotFound()
     {
@@ -100,6 +122,7 @@ public class OrderControllerTests
 
     // Create
 
+    // Valid DTO returns 201 CreatedAtAction pointing to GetById.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedAtAction()
     {
@@ -112,6 +135,7 @@ public class OrderControllerTests
         Assert.IsType<CreatedAtActionResult>(result);
     }
 
+    // Response body contains the newly created order.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedOrder()
     {
@@ -125,6 +149,7 @@ public class OrderControllerTests
         Assert.Equal(created, result?.Value);
     }
 
+    // CreatedAtAction route values reference the GetById action with the new order's ID.
     [Fact]
     public async Task Create_ValidDto_PointsToGetByIdRoute()
     {
@@ -138,6 +163,7 @@ public class OrderControllerTests
         Assert.Equal(7, ((dynamic)result!.RouteValues!["id"]!));
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Create_InvalidModelState_ReturnsBadRequest()
     {
@@ -149,6 +175,7 @@ public class OrderControllerTests
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // Service throws KeyNotFoundException for an unknown user, which the controller maps to 400 Bad Request.
     [Fact]
     public async Task Create_UnknownUser_ReturnsBadRequest()
     {
@@ -162,6 +189,7 @@ public class OrderControllerTests
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // Service throws KeyNotFoundException for an unknown restaurant, which maps to 400 Bad Request.
     [Fact]
     public async Task Create_UnknownRestaurant_ReturnsBadRequest()
     {
@@ -175,6 +203,7 @@ public class OrderControllerTests
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // Service throws KeyNotFoundException for an unknown menu item, which maps to 400 Bad Request.
     [Fact]
     public async Task Create_UnknownMenuItem_ReturnsBadRequest()
     {
@@ -190,30 +219,34 @@ public class OrderControllerTests
 
     // UpdateStatus
 
+    // Successful status update returns 200 OK with the updated order.
     [Fact]
-    public async Task UpdateStatus_ExistingOrder_ReturnsNoContent()
+    public async Task UpdateStatus_ExistingOrder_ReturnsOk()
     {
         var (controller, mockService) = CreateController();
-        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
-        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Preparing };
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(true);
+        mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(MakeOrderDto());
 
         var result = await controller.UpdateStatus(1, dto);
 
-        Assert.IsType<NoContentResult>(result);
+        Assert.IsType<OkObjectResult>(result);
     }
 
+    // Returns 404 Not Found when no order matches the given ID.
     [Fact]
     public async Task UpdateStatus_NonExistingOrder_ReturnsNotFound()
     {
         var (controller, mockService) = CreateController();
-        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Confirmed };
-        mockService.Setup(s => s.UpdateStatusAsync(99, dto)).ReturnsAsync(false);
+        var dto = new UpdateOrderStatusDto { Status = OrderStatus.Preparing };
+        mockService.Setup(s => s.UpdateStatusAsync(99, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(false);
 
         var result = await controller.UpdateStatus(99, dto);
 
         Assert.IsType<NotFoundResult>(result);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task UpdateStatus_InvalidModelState_ReturnsBadRequest()
     {
@@ -225,21 +258,23 @@ public class OrderControllerTests
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // Every non-Pending status value results in 200 OK when the service confirms the update.
     [Theory]
-    [InlineData(OrderStatus.Confirmed)]
     [InlineData(OrderStatus.Preparing)]
-    [InlineData(OrderStatus.Ready)]
+    [InlineData(OrderStatus.OnTheWay)]
+    [InlineData(OrderStatus.ReadyForPickup)]
     [InlineData(OrderStatus.Delivered)]
     [InlineData(OrderStatus.Cancelled)]
-    public async Task UpdateStatus_EachValidStatus_ReturnsNoContent(OrderStatus status)
+    public async Task UpdateStatus_EachValidStatus_ReturnsOk(OrderStatus status)
     {
         var (controller, mockService) = CreateController();
         var dto = new UpdateOrderStatusDto { Status = status };
-        mockService.Setup(s => s.UpdateStatusAsync(1, dto)).ReturnsAsync(true);
+        mockService.Setup(s => s.UpdateStatusAsync(1, dto, It.IsAny<int>(), It.IsAny<UserRole>())).ReturnsAsync(true);
+        mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(MakeOrderDto());
 
         var result = await controller.UpdateStatus(1, dto);
 
-        Assert.IsType<NoContentResult>(result);
+        Assert.IsType<OkObjectResult>(result);
     }
 }
 

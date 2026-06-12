@@ -6,8 +6,11 @@ using Moq;
 
 namespace Backend.Tests.Controllers;
 
+// Unit tests for AuthController.
+// IAuthService is mocked so no database, password hashing, or JWT logic runs.
 public class AuthControllerTests
 {
+    // Creates an AuthController with a mocked IAuthService.
     private static (AuthController controller, Mock<IAuthService> mockService) CreateController()
     {
         var mockService = new Mock<IAuthService>();
@@ -17,6 +20,7 @@ public class AuthControllerTests
 
     // Register
 
+    // Successful registration returns 201 Created.
     [Fact]
     public async Task Register_ValidDto_ReturnsCreatedAtAction()
     {
@@ -31,6 +35,7 @@ public class AuthControllerTests
         Assert.IsType<CreatedAtActionResult>(result);
     }
 
+    // Response body contains the auth token and user info.
     [Fact]
     public async Task Register_ValidDto_ReturnsAuthResponse()
     {
@@ -45,6 +50,7 @@ public class AuthControllerTests
         Assert.Equal(response, result?.Value);
     }
 
+    // Duplicate email causes the service to throw InvalidOperationException, which the controller maps to 409 Conflict.
     [Fact]
     public async Task Register_DuplicateEmail_ReturnsConflict()
     {
@@ -58,6 +64,7 @@ public class AuthControllerTests
         Assert.IsType<ConflictObjectResult>(result);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Register_InvalidModelState_ReturnsBadRequest()
     {
@@ -71,6 +78,7 @@ public class AuthControllerTests
 
     // Login
 
+    // Valid credentials return 200 OK.
     [Fact]
     public async Task Login_ValidCredentials_ReturnsOk()
     {
@@ -85,6 +93,7 @@ public class AuthControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the auth token and user info.
     [Fact]
     public async Task Login_ValidCredentials_ReturnsAuthResponse()
     {
@@ -99,6 +108,7 @@ public class AuthControllerTests
         Assert.Equal(response, result?.Value);
     }
 
+    // Wrong password causes the service to throw UnauthorizedAccessException, which maps to 401 Unauthorized.
     [Fact]
     public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
@@ -112,6 +122,7 @@ public class AuthControllerTests
         Assert.IsType<UnauthorizedObjectResult>(result);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Login_InvalidModelState_ReturnsBadRequest()
     {

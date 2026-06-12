@@ -6,8 +6,11 @@ using Moq;
 
 namespace Backend.Tests.Controllers;
 
+// Unit tests for CategoriesController.
+// ICategoryService is mocked so no database access occurs.
 public class CategoryControllerTests
 {
+    // Creates a CategoriesController with a mocked ICategoryService.
     private static (CategoriesController controller, Mock<ICategoryService> mockService) CreateController()
     {
         var mockService = new Mock<ICategoryService>();
@@ -17,6 +20,7 @@ public class CategoryControllerTests
 
     // GetByRestaurant
 
+    // Returns 200 OK for a valid restaurant ID.
     [Fact]
     public async Task GetByRestaurant_ReturnsOk()
     {
@@ -28,6 +32,7 @@ public class CategoryControllerTests
         Assert.IsType<OkObjectResult>(result);
     }
 
+    // Response body contains the full category list.
     [Fact]
     public async Task GetByRestaurant_ReturnsCategories()
     {
@@ -44,6 +49,7 @@ public class CategoryControllerTests
         Assert.Equal(categories, result?.Value);
     }
 
+    // Returns 200 OK with an empty collection when the restaurant has no categories.
     [Fact]
     public async Task GetByRestaurant_EmptyList_ReturnsOkWithEmptyCollection()
     {
@@ -58,6 +64,7 @@ public class CategoryControllerTests
 
     // Create
 
+    // Valid DTO returns 201 Created.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreated()
     {
@@ -71,6 +78,7 @@ public class CategoryControllerTests
         Assert.IsType<CreatedResult>(result);
     }
 
+    // Response body contains the newly created category.
     [Fact]
     public async Task Create_ValidDto_ReturnsCreatedCategory()
     {
@@ -84,6 +92,7 @@ public class CategoryControllerTests
         Assert.Equal(created, result?.Value);
     }
 
+    // Invalid model state short-circuits before calling the service and returns 400 Bad Request.
     [Fact]
     public async Task Create_InvalidModelState_ReturnsBadRequest()
     {

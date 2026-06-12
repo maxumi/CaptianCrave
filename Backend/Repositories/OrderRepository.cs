@@ -20,7 +20,7 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == id);
 
-    // Inserts a new order row (cascade saves order items) and returns it with its generated ID.
+    // Inserts a new order; EF Core cascades the insert to OrderItems automatically.
     public async Task<Order> CreateAsync(Order order)
     {
         _db.Orders.Add(order);
@@ -41,6 +41,7 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
         return true;
     }
 
+    // Fetches all non-terminal orders (not Delivered/Cancelled) for a restaurant, newest first.
     public async Task<IEnumerable<Order>> GetActiveByRestaurantAsync(int restaurantId) =>
         await _db.Orders
             .Include(o => o.OrderItems)
@@ -54,6 +55,7 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
             .OrderByDescending(o => o.UpdatedAt)
             .ToListAsync();
 
+    // Fetches all terminal orders (Delivered or Cancelled) for a restaurant, most recently created first.
     public async Task<IEnumerable<Order>> GetHistoryByRestaurantAsync(int restaurantId) =>
         await _db.Orders
             .Include(o => o.OrderItems)
@@ -80,6 +82,7 @@ public class OrderRepository(AppDbContext db) : IOrderRepository
                 && o.Status != OrderStatus.Delivered
                 && o.Status != OrderStatus.Cancelled);
 
+    // Fetches all terminal orders (Delivered or Cancelled) for a user, most recently created first.
     public async Task<IEnumerable<Order>> GetHistoryForUserAsync(int userId) =>
         await _db.Orders
             .Include(o => o.OrderItems)

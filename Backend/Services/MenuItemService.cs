@@ -47,7 +47,7 @@ public class MenuItemService(IMenuItemRepository menuItemRepository, IRestaurant
         existing.IsAvailable = dto.IsAvailable;
         existing.CategoryId = dto.CategoryId;
 
-        // Restaurant users can only edit items under their existing restaurant.
+        // Admins can reassign an item to any restaurant; Restaurant users are locked to their own.
         if (isAdmin)
             existing.RestaurantId = dto.RestaurantId;
 
