@@ -27,60 +27,66 @@ export class Login {
   private readonly translocoService = inject(TranslocoService);
   readonly isSubmitting = signal(false);
   readonly loginError = signal<string | null>(null);
+
+  // The router is used to navigate to the home page after a successful login
   private readonly router = inject(Router);
 
   loginModel = signal<LoginFormData>({
     email: '',
     password: '',
   });
-loginForm = form(
-  this.loginModel,
-  (schemaPath) => {
-    required(schemaPath.email, {
-      message: this.translocoService.translate('login.validation.emailRequired'),
-    });
-    email(schemaPath.email, {
-      message: this.translocoService.translate('login.validation.emailInvalid'),
-    });
 
-    required(schemaPath.password, {
-      message: this.translocoService.translate('login.validation.passwordRequired'),
-    });
-  },
-  {
-    submission: {
-      action: async () => {
-        this.loginError.set(null);
-        this.isSubmitting.set(true);
+  // The forms validation schema and given requirements
+  loginForm = form(
+    this.loginModel,
+    (schemaPath) => {
+      required(schemaPath.email, {
+        message: this.translocoService.translate('login.validation.emailRequired'),
+      });
+      email(schemaPath.email, {
+        message: this.translocoService.translate('login.validation.emailInvalid'),
+      });
 
-        try {
-          await firstValueFrom(
-            this.authService.login({
-              email: this.loginForm.email().value(),
-              password: this.loginForm.password().value(),
-            }),
-          );
+      required(schemaPath.password, {
+        message: this.translocoService.translate('login.validation.passwordRequired'),
+      });
+    },
+    {
+      submission: {
+        action: async () => {
+          // When the form is consired submitted, this code is run below
+          this.loginError.set(null);
+          this.isSubmitting.set(true);
 
-          await this.router.navigate(['/']);
+          try {
+            // since function is async, it needs to convert observables to promise and await them
+            await firstValueFrom(
+              this.authService.login({
+                email: this.loginForm.email().value(),
+                password: this.loginForm.password().value(),
+              }),
+            );
 
-          return null;
-        } catch (error) {
-          const message = getAuthErrorMessage(
-            error,
-            this.translocoService.translate('login.error.signInFailed'),
-          );
+            await this.router.navigate(['/']);
 
-          this.loginError.set(message);
+            return null;
+          } catch (error) {
+            const message = getAuthErrorMessage(
+              error,
+              this.translocoService.translate('login.error.signInFailed'),
+            );
 
-          return {
-            kind: 'serverError' as const,
-            message,
-          };
-        } finally {
-          this.isSubmitting.set(false);
-        }
+            this.loginError.set(message);
+
+            return {
+              kind: 'serverError' as const,
+              message,
+            };
+          } finally {
+            this.isSubmitting.set(false);
+          }
+        },
       },
     },
-  },
-);
+  );
 }

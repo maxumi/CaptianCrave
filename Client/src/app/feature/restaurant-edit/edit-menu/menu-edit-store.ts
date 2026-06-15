@@ -6,12 +6,20 @@ import { MenuItem, MenuEditMode, UpdateMenuItemRequest } from './edit-menu.model
 import { MenuItemApiService } from '../../../shared/menu-item-api.service';
 import { RestaurantApiService } from '../../../shared/restaurant-api.service';
 
+/**
+ * Store used by MenuEditComponent to manage state and logic
+ * related to editing menu items.
+ *
+ * It can also be reused by future components that need the same
+ * menu editing behavior.
+ */
 @Injectable()
 export class MenuEditStore {
   private readonly menuApiService = inject(MenuItemApiService);
   private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly translocoService = inject(TranslocoService);
 
+  /**mode menas either "edit" or "create" */
   readonly mode = signal<MenuEditMode>('edit');
   readonly isSubmitting = signal(false);
   readonly isLoading = signal(true);
@@ -19,7 +27,12 @@ export class MenuEditStore {
   readonly errorMessage = signal('');
 
   readonly menuItems = signal<MenuItem[]>([]);
+
+  /** Selected item in use */
   readonly selectedItem = signal<MenuItem | null>(null);
+
+  /** The restaurantId is needed to create new menu items 
+   * and to know which restaurant's menu items to load. */
   readonly restaurantId = signal<number | null>(null);
 
   load(): void {
@@ -104,11 +117,10 @@ selectItem(item: MenuItem): MenuItem | null {
     this.errorMessage.set('');
     this.isSubmitting.set(true);
 
+     // New items are created. Existing items are updated.
     const isNewItem = this.mode() === 'create' || item.id === 0;
-    // Convert the form item to the payload for API.
     const payload = this.toPayload(item, restaurantId);
 
-    // Create or Update request
     const request = isNewItem
       ? this.menuApiService.create(payload)
       : this.menuApiService.update(item.id, payload);
@@ -157,6 +169,12 @@ selectItem(item: MenuItem): MenuItem | null {
     return this.translocoService.translate(`menuEdit.${key}`);
   }
 
+  /**
+   * Creates a draft menu item used when starting item creation.
+   *
+   * The draft is only used locally in the form and is not saved until saveItem is called.
+   *
+   */
   createDraftItem(overrides: Partial<MenuItem> = {}): MenuItem {
     return {
       id: 0,
@@ -170,7 +188,13 @@ selectItem(item: MenuItem): MenuItem | null {
       ...overrides,
     };
   }
-
+  
+  /**
+   * Updates local store state after a menu item has been saved.
+   *
+   * New items are added to the list, while existing items replace
+   * their previous version. The saved item is then selected and the form returns to edit mode.
+   */
   private updateStateAfterSave(
     savedItem: MenuItem,
     isNewItem: boolean
