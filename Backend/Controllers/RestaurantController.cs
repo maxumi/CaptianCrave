@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace Backend.Controllers;
 
-// Handles HTTP requests for restaurant resources.
+// Handles requests related to restaurants. 
 [ApiController]
 [Route("api/[controller]")]
 public class RestaurantsController(IRestaurantService restaurantService, IMenuItemService menuItemService) : ControllerBase
@@ -15,6 +15,7 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
     private readonly IRestaurantService _restaurantService = restaurantService;
     private readonly IMenuItemService _menuItemService = menuItemService;
 
+    // Retrieves the logged-in user's ID from the JWT token.
     private int? GetCurrentUserId()
     {
         var claimValue = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -23,7 +24,7 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
         return int.TryParse(claimValue, out var userId) ? userId : null;
     }
 
-    // Returns every restaurant.
+    // Returns all restaurants.
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -31,6 +32,7 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
         return Ok(restaurants);
     }
 
+    // Returns restaurants within the specified radius of the given latitude and longitude.
     [HttpGet("nearby")]
     public async Task<IActionResult> GetNearby(
         [FromQuery] double latitude,
@@ -57,6 +59,8 @@ public class RestaurantsController(IRestaurantService restaurantService, IMenuIt
         return Ok(restaurant);
     }
     
+    // Returns the restaurant profile that belongs
+    // to the currently logged-in restaurant user.
     [HttpGet("me")]
     [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> GetMine()

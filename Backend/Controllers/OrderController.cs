@@ -6,6 +6,7 @@ using System.Security.Claims;
 
 namespace Backend.Controllers;
 
+// Handles requests related to customer and restaurant orders.
 [ApiController]
 [Route("api/[controller]")]
 public class OrdersController(IOrderService orderService) : ControllerBase
@@ -14,9 +15,11 @@ public class OrdersController(IOrderService orderService) : ControllerBase
 
     // POST: api/orders — creates a new order for an authenticated customer.
     [HttpPost]
-    [Authorize(Roles = "Customer,Admin")]
+    [Authorize(Roles = "Customer,Admin")] // Only customers and admins can create orders.
     public async Task<IActionResult> Create(CreateOrderDto dto)
     {
+        // Checks if the incoming request data is valid. 
+        // If not, it returns a 400 Bad Request response with details about the validation errors.
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
@@ -48,8 +51,12 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetActiveOrderForCustomer()
     {
+        // Gets the authenticated user's ID from the JWT token.
         var userId = User.GetId();
+
+        // Retrieves the customer's active order. If there is no active order, it returns a 404 Not Found response.
         var order = await _orderService.GetActiveOrderForUserAsync(userId);
+
         if (order is null)
             return NotFound();
 
@@ -61,15 +68,20 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetActiveOrder() => await GetActiveOrderForCustomer();
 
+    // Returns all completed or historical orders for a customer.
     [HttpGet("customer/history")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> GetCustomerHistory()
     {
+        // Gets the current customer ID from JWT.
         var userId = User.GetId();
+
+        // Retrieves previous orders. If there are no previous orders, it returns an empty list.
         var orders = await _orderService.GetHistoricOrdersForUserAsync(userId);
         return Ok(orders);
     }
 
+    // Returns all active orders belonging to a restaurant.
     [HttpGet("restaurant/active")]
     [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> GetRestaurantActiveOrders()
@@ -78,11 +90,13 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         var role = User.GetRole();
         try
         {
+            // Retrieves active orders for the restaurant.
             var orders = await _orderService.GetRestaurantActiveOrdersAsync(userId, role);
             return Ok(orders);
         }
         catch (UnauthorizedAccessException ex)
         {
+            // User is not allowed to access these orders.
             return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message });
         }
         catch (KeyNotFoundException ex)
@@ -95,6 +109,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         }
     }
 
+    // Returns all completed orders for a restaurant.
     [HttpGet("restaurant/history")]
     [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> GetRestaurantHistoricOrders()
@@ -103,6 +118,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         var role = User.GetRole();
         try
         {
+            // Retrieves completed restaurant orders.
             var orders = await _orderService.GetRestaurantHistoricOrdersAsync(userId, role);
             return Ok(orders);
         }
@@ -121,6 +137,9 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     }
 
     // PATCH: api/orders/{id}/status")]
+    // Updates the status of an order. 
+    // Only restaurant users can update to "Preparing", "Ready", or "Completed". 
+    // Only customers can update to "Cancelled". 
     [HttpPatch("{id}/status")]
     [Authorize(Roles = "Restaurant,Admin")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateOrderStatusDto dto)
