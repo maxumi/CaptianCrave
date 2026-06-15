@@ -6,8 +6,6 @@ namespace Backend.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    // test
-    public DbSet<TestItem> TestItems => Set<TestItem>();
 
     public DbSet<User> Users { get; set; }
 
