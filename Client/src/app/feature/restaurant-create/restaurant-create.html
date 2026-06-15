@@ -1,14 +1,14 @@
 <div class="restaurant-create-card card" *transloco="let t">
-  <h2>Create restaurant</h2>
+  <h2>{{ t('restaurantCreate.title') }}</h2>
 
   <form [formRoot]="restaurantForm">
-    <label for="restaurantName">Restaurant name</label>
+    <label for="restaurantName">{{ t('restaurantCreate.label.restaurantName') }}</label>
     <input
       id="restaurantName"
       class="form-control"
       type="text"
       [formField]="restaurantForm.restaurantName"
-      placeholder="Enter restaurant name"
+      [placeholder]="t('restaurantCreate.placeholder.restaurantName')"
     />
 
     @if (restaurantForm.restaurantName().touched() && restaurantForm.restaurantName().invalid()) {
@@ -17,12 +17,12 @@
       }
     }
 
-    <label for="description">Description</label>
+    <label for="description">{{ t('restaurantCreate.label.description') }}</label>
     <textarea
       id="description"
       class="form-control"
       [formField]="restaurantForm.description"
-      placeholder="Enter restaurant description"
+      [placeholder]="t('restaurantCreate.placeholder.description')"
     ></textarea>
 
     @if (restaurantForm.description().touched() && restaurantForm.description().invalid()) {
@@ -31,7 +31,7 @@
       }
     }
 
-    <label for="address">Address</label>
+    <label for="address">{{ t('restaurantCreate.label.address') }}</label>
 
     <div class="location-row">
       <input
@@ -39,7 +39,7 @@
         class="form-control"
         type="text"
         [formField]="restaurantForm.address"
-        placeholder="Enter restaurant address"
+        [placeholder]="t('restaurantCreate.placeholder.address')"
       />
 
       <button
@@ -47,7 +47,7 @@
         type="button"
         (click)="setLocationFromAddress()"
       >
-        Set location
+        {{ t('restaurantCreate.button.setLocation') }}
       </button>
     </div>
 
@@ -60,8 +60,14 @@
     <div id="restaurant-create-map"></div>
 
     <div class="location-info">
-      <p><strong>Latitude:</strong> {{ restaurantModel().latitude }}</p>
-      <p><strong>Longitude:</strong> {{ restaurantModel().longitude }}</p>
+      <p>
+        <strong>{{ t('restaurantCreate.label.latitude') }}:</strong>
+        {{ restaurantModel().latitude }}
+      </p>
+      <p>
+        <strong>{{ t('restaurantCreate.label.longitude') }}:</strong>
+        {{ restaurantModel().longitude }}
+      </p>
     </div>
 
     @if (submitError()) {
@@ -73,7 +79,11 @@
       type="submit"
       [disabled]="restaurantForm().invalid() || isSubmitting()"
     >
-      {{ isSubmitting() ? 'Creating...' : 'Create restaurant' }}
+      {{
+        isSubmitting()
+          ? t('restaurantCreate.button.creating')
+          : t('restaurantCreate.button.create')
+      }}
     </button>
   </form>
 </div>

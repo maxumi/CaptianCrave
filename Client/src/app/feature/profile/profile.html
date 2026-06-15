@@ -1,25 +1,32 @@
-<div class="profile-page">
+<div class="profile-page" *transloco="let t">
   <div class="profile-card">
-    <h2>Profile</h2>
+    <h2>{{ t('profile.title') }}</h2>
 
     <div class="profile-info">
-      <p><strong>Name:</strong> {{ name() }}</p>
-      <p><strong>Address:</strong> {{ address() }}</p>
+      <p>
+        <strong>{{ t('profile.name') }}:</strong>
+        {{ name() }}
+      </p>
+
+      <p>
+        <strong>{{ t('profile.address') }}:</strong>
+        {{ address() }}
+      </p>
     </div>
 
-    <label for="address">Change address</label>
+    <label for="address">{{ t('profile.changeAddress') }}</label>
 
     <input
       id="address"
       class="form-input"
       type="text"
-      placeholder="Enter new address"
+      [placeholder]="t('profile.placeholder.address')"
       [ngModel]="addressInput()"
       (ngModelChange)="addressInput.set($event)"
     />
 
     <button class="form-button" type="button" (click)="saveAddress()">
-      Save address
+      {{ t('profile.saveAddress') }}
     </button>
 
     @if (saveError()) {

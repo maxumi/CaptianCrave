@@ -2,13 +2,15 @@ import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
+import { TranslocoModule } from '@jsverse/transloco';
+
 import { AuthService } from '../../core/auth/auth.service';
 import { Role } from '../../shared/models/user';
 import { RestaurantApiService } from '../../shared/restaurant-api.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

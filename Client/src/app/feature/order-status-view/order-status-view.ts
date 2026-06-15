@@ -1,7 +1,9 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { DeliveryType, OrderApiService, OrderDto } from '../../shared/order-api.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { MatIconModule } from '@angular/material/icon';
+
+import { DeliveryType, OrderApiService, OrderDto } from '../../shared/order-api.service';
 import { OrderStatus } from '../../shared/models/status';
 
 interface OrderDetails extends OrderDto {}
@@ -14,15 +16,16 @@ interface OrderStep {
 
 @Component({
   selector: 'app-order-status-view',
-  imports: [DatePipe, DecimalPipe, MatIconModule],
+  imports: [DatePipe, DecimalPipe, MatIconModule, TranslocoModule],
   templateUrl: './order-status-view.html',
   styleUrl: './order-status-view.css',
 })
 export class OrderStatusView implements OnInit {
   private readonly orderApiService = inject(OrderApiService);
+  private readonly transloco = inject(TranslocoService);
+
   readonly OrderStatus = OrderStatus;
   readonly DeliveryType = DeliveryType;
-
 
   readonly isLoading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -37,9 +40,9 @@ export class OrderStatusView implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.loadError.set('Failed to load order details.');
+        this.loadError.set(this.t('orderStatus.error.loadFailed'));
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -48,18 +51,18 @@ export class OrderStatusView implements OnInit {
 
     if (isPickup) {
       return [
-        { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
-        { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
-        { label: 'Ready for pickup', status: OrderStatus.ReadyForPickup, icon: 'store' },
-        { label: 'Completed', status: OrderStatus.Delivered, icon: 'task_alt' },
+        { label: this.t('orderStatus.step.placed'), status: OrderStatus.Pending, icon: 'check' },
+        { label: this.t('orderStatus.step.preparing'), status: OrderStatus.Preparing, icon: 'restaurant' },
+        { label: this.t('orderStatus.step.readyForPickup'), status: OrderStatus.ReadyForPickup, icon: 'store' },
+        { label: this.t('orderStatus.step.completed'), status: OrderStatus.Delivered, icon: 'task_alt' },
       ];
     }
 
     return [
-      { label: 'Placed', status: OrderStatus.Pending, icon: 'check' },
-      { label: 'Preparing', status: OrderStatus.Preparing, icon: 'restaurant' },
-      { label: 'On the way', status: OrderStatus.OnTheWay, icon: 'two_wheeler' },
-      { label: 'Delivered', status: OrderStatus.Delivered, icon: 'home' },
+      { label: this.t('orderStatus.step.placed'), status: OrderStatus.Pending, icon: 'check' },
+      { label: this.t('orderStatus.step.preparing'), status: OrderStatus.Preparing, icon: 'restaurant' },
+      { label: this.t('orderStatus.step.onTheWay'), status: OrderStatus.OnTheWay, icon: 'two_wheeler' },
+      { label: this.t('orderStatus.step.delivered'), status: OrderStatus.Delivered, icon: 'home' },
     ];
   }
 
@@ -70,7 +73,7 @@ export class OrderStatusView implements OnInit {
       return -1;
     }
 
-    return this.steps.findIndex(step => step.status === currentOrder.status);
+    return this.steps.findIndex((step) => step.status === currentOrder.status);
   }
 
   isCompleted(index: number): boolean {
@@ -80,7 +83,7 @@ export class OrderStatusView implements OnInit {
   isActive(index: number): boolean {
     return index === this.currentStepIndex;
   }
-  
+
   isPending(index: number): boolean {
     return index > this.currentStepIndex;
   }
@@ -88,40 +91,42 @@ export class OrderStatusView implements OnInit {
   get statusTitle(): string {
     switch (this.order()?.status) {
       case OrderStatus.Pending:
-        return 'Pending';
+        return this.t('orderStatus.status.pending');
       case OrderStatus.Preparing:
-        return 'Preparing';
+        return this.t('orderStatus.status.preparing');
       case OrderStatus.OnTheWay:
-        return 'On the way';
+        return this.t('orderStatus.status.onTheWay');
       case OrderStatus.ReadyForPickup:
-        return 'Ready for pickup';
+        return this.t('orderStatus.status.readyForPickup');
       case OrderStatus.Delivered:
-        return 'Delivered';
+        return this.t('orderStatus.status.delivered');
       case OrderStatus.Cancelled:
-        return 'Cancelled';
+        return this.t('orderStatus.status.cancelled');
       default:
-        return 'Pending';
+        return this.t('orderStatus.status.pending');
     }
   }
 
   get statusMessage(): string {
-    const status = this.order()?.status;
-
-    switch (status) {
+    switch (this.order()?.status) {
       case OrderStatus.Pending:
-        return 'Your order has been placed and is waiting for the restaurant.';
+        return this.t('orderStatus.message.pending');
       case OrderStatus.Preparing:
-        return 'Your food is being prepared.';
+        return this.t('orderStatus.message.preparing');
       case OrderStatus.OnTheWay:
-        return 'Your order is on the way. Almost there!';
+        return this.t('orderStatus.message.onTheWay');
       case OrderStatus.ReadyForPickup:
-        return 'Your order is ready for pickup at the restaurant.';
+        return this.t('orderStatus.message.readyForPickup');
       case OrderStatus.Delivered:
-        return 'Your order has been delivered.';
+        return this.t('orderStatus.message.delivered');
       case OrderStatus.Cancelled:
-        return 'Your order was cancelled.';
+        return this.t('orderStatus.message.cancelled');
       default:
-        return 'Waiting for order status.';
+        return this.t('orderStatus.message.waiting');
     }
+  }
+
+  private t(key: string): string {
+    return this.transloco.translate(key);
   }
 }

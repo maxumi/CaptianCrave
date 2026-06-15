@@ -16,7 +16,6 @@ import { OrderStatusView } from './feature/order-status-view/order-status-view';
 
 export const routes: Routes = [
   { path: '', component: Home },
-  { path: 'test', component: TestComponent },
   { path: 'login', component: Login, canActivate: [guestGuard] },
   { path: 'register', component: Register, canActivate: [guestGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
@@ -28,5 +27,6 @@ export const routes: Routes = [
   { path: 'restaurants', component: Restaurants, canActivate: [authGuard]  },
   { path: 'restaurantInfo', component: RestaurantInfo, canActivate: [authGuard]  },
   
+  // not found route, should always be last
    { path: '**', component: NotFound }
 ];

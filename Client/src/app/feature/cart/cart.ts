@@ -3,14 +3,14 @@ import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from '../../shared/cart.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { DeliveryType, OrderApiService } from '../../shared/order-api.service';
-import { RestaurantApiService } from '../../shared/restaurant-api.service';
-import { firstValueFrom } from 'rxjs';
+import { CreateOrderRequest, DeliveryType, OrderApiService } from '../../shared/order-api.service';
+import { finalize } from 'rxjs';
 import { Role } from '../../shared/models/user';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-cart',
-  imports: [],
+  imports: [TranslocoModule],
   templateUrl: './cart.html',
   styleUrl: './cart.css',
 })
@@ -18,14 +18,15 @@ export class Cart implements OnInit {
   readonly cartService = inject(CartService);
   private readonly authService = inject(AuthService);
   private readonly orderApiService = inject(OrderApiService);
-  private readonly restaurantApiService = inject(RestaurantApiService);
   private readonly router = inject(Router);
+  readonly DeliveryType = DeliveryType;
+  readonly selectedDeliveryType = signal<DeliveryType>(DeliveryType.Delivery);
+  private readonly transloco = inject(TranslocoService);
 
   readonly cartItems = this.cartService.items;
   readonly total = this.cartService.total;
   readonly isSubmittingOrder = signal(false);
   readonly checkoutError = signal<string | null>(null);
-  readonly checkoutSuccess = signal<string | null>(null);
   readonly canCheckout = computed(() => this.authService.user()?.role === Role.Customer);
 
   ngOnInit(): void {
@@ -55,62 +56,72 @@ export class Cart implements OnInit {
     this.cartService.clear();
   }
 
-  async checkout(): Promise<void> {
+  checkout(): void {
     const user = this.authService.user();
     const items = this.cartItems();
 
     this.checkoutError.set(null);
-    this.checkoutSuccess.set(null);
 
     if (!user) {
-      this.checkoutError.set('You must be logged in to place an order.');
+      this.checkoutError.set(this.t('cart.error.notLoggedIn'));
       return;
     }
 
     if (user.role !== Role.Customer) {
-      this.checkoutError.set('Only customer accounts can place orders.');
+      this.checkoutError.set(this.t('cart.error.customerOnly'));
       return;
     }
 
     if (!items.length) {
-      this.checkoutError.set('Your cart is empty.');
+      this.checkoutError.set(this.t('cart.error.empty'));
       return;
     }
 
-    if (!user.address || user.latitude == null || user.longitude == null) {
-      this.checkoutError.set('Please update your profile address before checkout.');
+    const selectedDeliveryType = this.selectedDeliveryType();
+
+    if (
+      selectedDeliveryType === DeliveryType.Delivery &&
+      (!user.address || user.latitude == null || user.longitude == null)
+    ) {
+      this.checkoutError.set(this.t('cart.error.addressRequired'));
       return;
     }
 
     const restaurantId = items[0].restaurantId;
 
+    const payload: CreateOrderRequest = {
+      userId: user.userId,
+      restaurantId,
+      deliveryType: selectedDeliveryType,
+      items: items.map((item) => ({
+        menuItemId: item.menuItemId,
+        quantity: item.quantity,
+      })),
+    };
+
+    if (selectedDeliveryType === DeliveryType.Delivery) {
+      payload.deliveryAddress = user.address;
+    }
+
     this.isSubmittingOrder.set(true);
 
-    try {
-      const order = await firstValueFrom(
-        this.orderApiService.createOrder({
-          userId: user.userId,
-          restaurantId,
-          deliveryType: DeliveryType.Delivery,
-          deliveryAddress: user.address,
-          items: items.map((item) => ({
-            menuItemId: item.menuItemId,
-            quantity: item.quantity,
-          })),
-        })
-      );
+    this.orderApiService
+      .createOrder(payload)
+      .pipe(finalize(() => this.isSubmittingOrder.set(false)))
+      .subscribe({
+        next: () => {
+          this.cartService.clear();
+          this.router.navigate(['/order-status']);
+        },
+        error: (error: HttpErrorResponse) => {
+          const backendMessage =
+            typeof error.error?.message === 'string' ? error.error.message : null;
 
-      this.cartService.clear();
-      this.router.navigate(['/order-status']);
-    } catch (error) {
-      const httpError = error as HttpErrorResponse;
-      const backendMessage =
-        typeof httpError.error?.message === 'string' ? httpError.error.message : null;
-
-      this.checkoutError.set(backendMessage ?? 'Unable to place order right now.');
-    } finally {
-      this.isSubmittingOrder.set(false);
-    }
+          this.checkoutError.set(backendMessage ?? this.t('cart.error.checkoutFailed'));
+        },
+      });
   }
-
+private t(key: string): string {
+  return this.transloco.translate(key);
+}
 }
