@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+// Handles requests related to the currently logged-in user.
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
